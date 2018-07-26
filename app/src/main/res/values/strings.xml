@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">music_22</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_offline">Offline</string>
+    <string name="title_singer">Singer</string>
+    <string name="title_gernes">Gernes</string>
+</resources>
