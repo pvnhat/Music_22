@@ -6,4 +6,8 @@
     <string name="title_offline">Offline</string>
     <string name="title_singer">Singer</string>
     <string name="title_gernes">Gernes</string>
+    <string name="text_frag4">Frag4</string>
+    <string name="text_frag1">Frag1</string>
+    <string name="text_frag2">Frag2</string>
+    <string name="text_frag3">Frag3</string>
 </resources>
