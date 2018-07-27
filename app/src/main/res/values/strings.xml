@@ -10,4 +10,6 @@
     <string name="text_frag1">Frag1</string>
     <string name="text_frag2">Frag2</string>
     <string name="text_frag3">Frag3</string>
+    <string name="string_onclick_item">Put here for next pull request</string>
+    <string name="text_favorite_genres">Favourite Genres:</string>
 </resources>
