@@ -10,8 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import com.framgia.music_22.data.RequestCallbackData;
+import com.framgia.music_22.data.model.MoreSong;
+import com.framgia.music_22.data.model.Song;
+import com.framgia.music_22.data.repository.SongRepository;
+import com.framgia.music_22.data.source.ParseRemoteJsonData;
 import com.framgia.music_22.utils.Constant;
+import com.framgia.music_22.utils.TypeGenre;
 import com.framgia.vnnht.music_22.R;
+import java.sql.SQLOutput;
+import java.util.ArrayList;
 
 public class HomeFragment extends Fragment
         implements HomePageContract.View, ViewPager.OnPageChangeListener {
@@ -19,6 +27,7 @@ public class HomeFragment extends Fragment
     private ViewPager mViewPagerBanner;
     private LinearLayout mLinearDots;
     private ImageView[] mImageDots;
+    private HomePageContract.Presenter mPresenter;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -30,7 +39,17 @@ public class HomeFragment extends Fragment
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
         initView(view);
+        onReceiveSongList();
         return view;
+    }
+
+    private void onReceiveSongList() {
+        SongRepository songRepository =
+                SongRepository.getsInstance(ParseRemoteJsonData.getInstance());
+        if (songRepository != null) {
+            mPresenter = new HomePresenter(this, songRepository);
+            mPresenter.getSongByGenres(TypeGenre.ALTERNATIVEROCK);
+        }
     }
 
     private void initView(View view) {
@@ -79,5 +98,17 @@ public class HomeFragment extends Fragment
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    @Override
+    public void onGetSongByGenreSuccess(MoreSong moreSong) {
+        // for testing
+        System.out.println(moreSong.getSongsList().get(0).getTitle());
+    }
+
+    @Override
+    public void onError(Exception ex) {
+        // FOR TESTING
+        System.out.println(ex.getMessage());
     }
 }

@@ -12,4 +12,5 @@
     <string name="text_frag3">Frag3</string>
     <string name="string_onclick_item">Put here for next pull request</string>
     <string name="text_favorite_genres">Favourite Genres:</string>
+    <string name="error_get_data">Ops ! Error while requesting !</string>
 </resources>

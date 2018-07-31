@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import com.framgia.music_22.utils.Constant;
+import com.framgia.music_22.utils.TypeTab;
 import com.framgia.vnnht.music_22.R;
 
 public class MainActivity extends AppCompatActivity
@@ -28,16 +29,16 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item_homepage:
-                mPagerMain.setCurrentItem(Constant.Tab.TAB_HOME);
+                mPagerMain.setCurrentItem(TypeTab.TAB_HOME);
                 return true;
             case R.id.item_offline:
-                mPagerMain.setCurrentItem(Constant.Tab.TAB_OFFLINE);
+                mPagerMain.setCurrentItem(TypeTab.TAB_OFFLINE);
                 return true;
             case R.id.item_singer:
-                mPagerMain.setCurrentItem(Constant.Tab.TAB_ARTIST);
+                mPagerMain.setCurrentItem(TypeTab.TAB_ARTIST);
                 return true;
             case R.id.item_gernes:
-                mPagerMain.setCurrentItem(Constant.Tab.TAB_GENRES);
+                mPagerMain.setCurrentItem(TypeTab.TAB_GENRES);
                 return true;
         }
         return false;

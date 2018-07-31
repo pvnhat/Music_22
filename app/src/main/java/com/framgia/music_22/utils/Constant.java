@@ -1,10 +1,11 @@
 package com.framgia.music_22.utils;
 
 import android.support.annotation.IntDef;
+import android.support.annotation.StringDef;
+import com.framgia.vnnht.music_22.BuildConfig;
 
 public class Constant {
 
-    public static final int TIME_SLEEP = 3000;
     public static final int TAB_COUNT = 4;
 
     public static final int NUMBER_OF_BANNER = 6;
@@ -21,11 +22,15 @@ public class Constant {
     public static final String BANNER_ITEM6 =
             "http://img.hplus.com.vn/460x260/poster/2015/04/21/194089-DOAN_DUONG_VANG.jpg";
 
-    @IntDef({ Tab.TAB_HOME, Tab.TAB_OFFLINE, Tab.TAB_ARTIST, Tab.TAB_GENRES })
-    public @interface Tab {
-        int TAB_HOME = 0;
-        int TAB_OFFLINE = 1;
-        int TAB_ARTIST = 2;
-        int TAB_GENRES = 3;
-    }
+    // For get data from api
+    public static final String REQUEST_METHOD = "GET";
+    public static final int READ_TIMEOUT = 10000;
+    public static final int CONNECT_TIMEOUT = 15000;
+    public static final String BASE_URL = "http://api.soundcloud.com";
+    public static final String CLIENT_ID = "?client_id=" + BuildConfig.API_KEY;
+    public static final String GENRES_URL =
+            BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&genres=";
+    public static final String ARRAY_JSON_NAME = "collection";
+    public static final String NEXT_HREF = "next_href";
+
 }
