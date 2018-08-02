@@ -8,6 +8,7 @@ import com.framgia.music_22.screen.home_screen.HomeFragment;
 import com.framgia.music_22.screen.offline_screen.OfflineFragment;
 import com.framgia.music_22.screen.singer_screen.SingerFragment;
 import com.framgia.music_22.utils.Constant;
+import com.framgia.music_22.utils.TypeTab;
 
 public class MainPagerAdapter extends FragmentPagerAdapter {
 
@@ -18,13 +19,13 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         switch (position) {
-            case Constant.Tab.TAB_HOME:
+            case TypeTab.TAB_HOME:
                 return HomeFragment.newInstance();
-            case Constant.Tab.TAB_OFFLINE:
+            case TypeTab.TAB_OFFLINE:
                 return OfflineFragment.newInstance();
-            case Constant.Tab.TAB_ARTIST:
+            case TypeTab.TAB_ARTIST:
                 return SingerFragment.newInstance();
-            case Constant.Tab.TAB_GENRES:
+            case TypeTab.TAB_GENRES:
                 return GenreFragment.newInstance();
             default:
                 return null;

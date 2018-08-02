@@ -14,7 +14,22 @@ public class Song implements Parcelable {
     private String mUri;
     private Artist mArtist;
 
+    public Song() {
+
+    }
+
     protected Song(Parcel in) {
+    }
+
+    protected Song(Builder builder) {
+        mSongId = builder.mSongId;
+        mTitle = builder.mTitle;
+        mGenre = builder.mGenre;
+        mUserId = builder.mUserId;
+        mStreamUrl = builder.mStreamUrl;
+        mDuaration = builder.mDuaration;
+        mUserId = builder.mUri;
+        mArtist = builder.mArtist;
     }
 
     public Song(String songId, String title, String genre, String userId, String streamUrl,
@@ -33,68 +48,109 @@ public class Song implements Parcelable {
         return mSongId;
     }
 
-    public void setSongId(String songId) {
-        mSongId = songId;
-    }
-
     public String getTitle() {
         return mTitle;
-    }
-
-    public void setTitle(String title) {
-        mTitle = title;
     }
 
     public String getGenre() {
         return mGenre;
     }
 
-    public void setGenre(String genre) {
-        mGenre = genre;
-    }
-
     public String getUserId() {
         return mUserId;
-    }
-
-    public void setUserId(String userId) {
-        mUserId = userId;
     }
 
     public String getStreamUrl() {
         return mStreamUrl;
     }
 
-    public void setStreamUrl(String streamUrl) {
-        mStreamUrl = streamUrl;
-    }
-
     public int getDuaration() {
         return mDuaration;
-    }
-
-    public void setDuaration(int duaration) {
-        mDuaration = duaration;
     }
 
     public String getUri() {
         return mUri;
     }
 
-    public void setUri(String uri) {
-        mUri = uri;
-    }
-
     public Artist getArtist() {
         return mArtist;
     }
 
-    public void setArtist(Artist artist) {
-        mArtist = artist;
-    }
-
     public static Creator<Song> getCREATOR() {
         return CREATOR;
+    }
+
+    // Builder class
+    public static class Builder {
+
+        private String mSongId;
+        private String mTitle;
+        private String mUserId;
+        private String mStreamUrl;
+        private String mGenre;
+        private int mDuaration;
+        private String mUri;
+        private Artist mArtist;
+
+        public Builder() {
+
+        }
+
+        public Builder(String songId, String title, String genre, String userId, String streamUrl,
+                int duaration, String uri, Artist artist) {
+            mSongId = songId;
+            mTitle = title;
+            mGenre = genre;
+            mUserId = userId;
+            mStreamUrl = streamUrl;
+            mDuaration = duaration;
+            mUri = uri;
+            mArtist = artist;
+        }
+
+        public Builder withSongId(String songId) {
+            this.mSongId = songId;
+            return this;
+        }
+
+        public Builder withTitle(String title) {
+            this.mTitle = title;
+            return this;
+        }
+
+        public Builder withGenre(String genre) {
+            this.mGenre = genre;
+            return this;
+        }
+
+        public Builder withUserId(String userId) {
+            this.mUserId = userId;
+            return this;
+        }
+
+        public Builder withStreamUrl(String streamUrl) {
+            this.mStreamUrl = streamUrl;
+            return this;
+        }
+
+        public Builder withDuaration(int duaration) {
+            this.mDuaration = duaration;
+            return this;
+        }
+
+        public Builder withUri(String uri) {
+            this.mUri = uri;
+            return this;
+        }
+
+        public Builder withArtist(Artist artist) {
+            this.mArtist = artist;
+            return this;
+        }
+
+        public Song build() {
+            return new Song(this);
+        }
     }
 
     public static final Creator<Song> CREATOR = new Creator<Song>() {
@@ -127,7 +183,7 @@ public class Song implements Parcelable {
     }
 
     public class APISongProperties {
-        public static final String SONG_ID = "ïd";
+        public static final String SONG_ID = "id";
         public static final String TITLE = "title";
         public static final String GENRE = "genre";
         public static final String USER_ID = "user_id";
