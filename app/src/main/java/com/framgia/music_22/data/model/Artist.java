@@ -12,7 +12,7 @@ public class Artist implements Parcelable {
     protected Artist(Parcel in) {
     }
 
-    public Artist(String singerId, String avatarUrl, String singerName) {
+    public Artist(String singerId, String singerName, String avatarUrl) {
         mSingerId = singerId;
         mAvatarUrl = avatarUrl;
         mSingerName = singerName;

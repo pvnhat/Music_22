@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimary">#494949</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="color_white_100">#ffffff</color>
@@ -8,4 +8,9 @@
     <color name="color_green_50">#26A69A</color>
     <color name="color_transparent_100">#00000000</color>
     <color name="color_black_51">#33FFFFFF</color>
+    <color name="color_black_60">#6c6363</color>
+    <color name="color_green_90">#04ff00</color>
+    <color name="color_berin_90">#00f7ff</color>
+    <color name="color_purple_80">#8c91d2</color>
+    <color name="color_black_30">#947777</color>
 </resources>

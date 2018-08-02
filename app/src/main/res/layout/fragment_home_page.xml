@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/color_black_60"
     >
 
     <android.support.v4.view.ViewPager
@@ -27,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_3"
         android:layout_margin="@dimen/dp_20"
-        android:background="@color/color_black_100"
+        android:background="@color/color_green_90"
         app:layout_constraintTop_toBottomOf="@id/viewpager_banner"
         />
 
@@ -69,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/dp_1"
                 android:layout_margin="@dimen/dp_10"
-                android:background="@color/color_black_100"
+                android:background="@color/color_green_90"
                 app:layout_constraintTop_toBottomOf="@id/button_all_audios"
                 />
             <TextView
@@ -78,8 +79,9 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dp_10"
                 android:text="@string/text_favorite_genres"
+                android:textColor="@color/color_berin_90"
                 android:textSize="@dimen/sp_18"
-                android:textStyle="bold"
+                android:textStyle="italic"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/view_line2"
                 />

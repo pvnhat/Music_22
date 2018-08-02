@@ -9,15 +9,11 @@ public interface HomePageContract {
      * view
      */
     interface View {
-        void onGetSongByGenreSuccess(MoreSong moreSong);
-
-        void onError(Exception ex);
     }
 
     /**
      * presenter
      */
     interface Presenter {
-        void getSongByGenres(String genre);
     }
 }

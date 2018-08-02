@@ -7,10 +7,10 @@ import android.support.annotation.StringDef;
         TypeGenre.CLASSICAL, TypeGenre.COUNTRY
 })
 public @interface TypeGenre {
-    String ALL_MUSIC = "allmusic";
-    String ALL_AUDIO = "audio";
-    String ALTERNATIVEROCK = "alternativerock";
-    String AMBIENT = "ambient";
-    String CLASSICAL = "classical";
-    String COUNTRY = "country";
+    String ALL_MUSIC = "Allmusic";
+    String ALL_AUDIO = "Audio";
+    String ALTERNATIVEROCK = "AlternativeRock";
+    String AMBIENT = "Ambient";
+    String CLASSICAL = "Classical";
+    String COUNTRY = "Country";
 }

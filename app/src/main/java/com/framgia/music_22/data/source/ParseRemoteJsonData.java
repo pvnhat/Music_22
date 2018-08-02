@@ -73,6 +73,6 @@ public class ParseRemoteJsonData implements GetSongDataSource.RemoteDataSource {
             public void onFetchDataError(Exception errorEx) {
                 callbackData.onGetDataError(errorEx);
             }
-        }).execute(Constant.GENRES_URL + genre);
+        }).execute(Constant.GENRES_URL + genre + Constant.LIMIT_NUMBER);
     }
 }
