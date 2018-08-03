@@ -18,9 +18,6 @@ public class Song implements Parcelable {
 
     }
 
-    protected Song(Parcel in) {
-    }
-
     protected Song(Builder builder) {
         mSongId = builder.mSongId;
         mTitle = builder.mTitle;
@@ -28,7 +25,7 @@ public class Song implements Parcelable {
         mUserId = builder.mUserId;
         mStreamUrl = builder.mStreamUrl;
         mDuaration = builder.mDuaration;
-        mUserId = builder.mUri;
+        mUri = builder.mUri;
         mArtist = builder.mArtist;
     }
 
@@ -175,11 +172,22 @@ public class Song implements Parcelable {
         parcel.writeString(mSongId);
         parcel.writeString(mTitle);
         parcel.writeString(mGenre);
-        parcel.writeString(mStreamUrl);
-        parcel.writeString(mUri);
         parcel.writeString(mUserId);
-        parcel.writeParcelable(mArtist, i);
+        parcel.writeString(mStreamUrl);
         parcel.writeInt(mDuaration);
+        parcel.writeString(mUri);
+        parcel.writeParcelable(mArtist, i);
+    }
+
+    protected Song(Parcel in) {
+        mSongId = in.readString();
+        mTitle = in.readString();
+        mGenre = in.readString();
+        mUserId = in.readString();
+        mStreamUrl = in.readString();
+        mDuaration = in.readInt();
+        mUri = in.readString();
+        mArtist = in.readParcelable(Artist.class.getClassLoader());
     }
 
     public class APISongProperties {

@@ -37,11 +37,11 @@ public class ParseRemoteJsonData implements GetSongDataSource.RemoteDataSource {
                         songJson.getString(Song.APISongProperties.SONG_ID))
                         .withTitle(songJson.getString(Song.APISongProperties.TITLE))
                         .withGenre(songJson.getString(Song.APISongProperties.GENRE))
+                        .withUserId(songJson.getString(Song.APISongProperties.USER_ID))
                         .withStreamUrl(songJson.getString(Song.APISongProperties.STREAM_URL))
                         .withDuaration(Integer.parseInt(
                                 songJson.getString(Song.APISongProperties.DUARATION)))
                         .withUri(songJson.getString(Song.APISongProperties.SONG_URI))
-                        .withUserId(songJson.getString(Song.APISongProperties.USER_ID))
                         .withArtist(
                                 new Artist(artistJson.getString(Artist.APIArtistProperties.USER_ID),
                                         artistJson.getString(Artist.APIArtistProperties.USER_NAME),

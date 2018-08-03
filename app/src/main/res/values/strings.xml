@@ -14,4 +14,9 @@
     <string name="text_favorite_genres">Favourite Genres:</string>
     <string name="error_get_data">Ops ! Error while requesting !</string>
     <string name="text_for_testing">Cuoc Song Em On Khong</string>
+    <string name="text_time">00:00</string>
+    <string name="text_inform_to_client_permisson">You have already permiss this permission !</string>
+    <string name="text_dowloading">Downloading ...</string>
+    <string name="text_download">Download:</string>
+    <string name="text_notification_playing">Playing Music</string>
 </resources>
