@@ -1,6 +1,9 @@
 package com.framgia.music_22.screen.home_screen;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -8,26 +11,21 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import com.framgia.music_22.data.RequestCallbackData;
 import com.framgia.music_22.data.model.MoreSong;
-import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.repository.SongRepository;
 import com.framgia.music_22.data.source.ParseRemoteJsonData;
+import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreActivity;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;
 import com.framgia.vnnht.music_22.R;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
 
 public class HomeFragment extends Fragment
-        implements HomePageContract.View, ViewPager.OnPageChangeListener {
+        implements HomePageContract.View, ViewPager.OnPageChangeListener, View.OnClickListener {
 
-    private ViewPager mViewPagerBanner;
     private LinearLayout mLinearDots;
-    private ImageView[] mImageDots;
-    private HomePageContract.Presenter mPresenter;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -35,29 +33,31 @@ public class HomeFragment extends Fragment
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
         initView(view);
-        onReceiveSongList();
         return view;
     }
 
-    private void onReceiveSongList() {
-        SongRepository songRepository =
-                SongRepository.getsInstance(ParseRemoteJsonData.getInstance());
-        if (songRepository != null) {
-            mPresenter = new HomePresenter(this, songRepository);
-            mPresenter.getSongByGenres(TypeGenre.ALTERNATIVEROCK);
-        }
-    }
-
     private void initView(View view) {
-        mViewPagerBanner = view.findViewById(R.id.viewpager_banner);
-        mViewPagerBanner.setOnPageChangeListener(this);
+        ViewPager viewPagerBanner = view.findViewById(R.id.viewpager_banner);
         mLinearDots = view.findViewById(R.id.linear_dots);
+        ImageButton buttonAllAudio = view.findViewById(R.id.button_all_audios);
+        ImageButton buttonAllSong = view.findViewById(R.id.button_all_song);
+        ImageButton buttonAlternativeRock = view.findViewById(R.id.button_alternativerock);
+        ImageButton buttonAmbient = view.findViewById(R.id.button_ambient);
+        ImageButton buttonClassic = view.findViewById(R.id.button_classic);
+
+        viewPagerBanner.setOnPageChangeListener(this);
+        buttonAllAudio.setOnClickListener(this);
+        buttonAllSong.setOnClickListener(this);
+        buttonAlternativeRock.setOnClickListener(this);
+        buttonAmbient.setOnClickListener(this);
+        buttonClassic.setOnClickListener(this);
+
         SlidePagerAdapter slidePagerAdapter = new SlidePagerAdapter(getActivity());
-        mViewPagerBanner.setAdapter(slidePagerAdapter);
+        viewPagerBanner.setAdapter(slidePagerAdapter);
         onCreateDots(0);
     }
 
@@ -65,15 +65,15 @@ public class HomeFragment extends Fragment
         if (mLinearDots != null) {
             mLinearDots.removeAllViews();
         }
-        mImageDots = new ImageView[Constant.NUMBER_OF_BANNER];
+        ImageView[] imageDots = new ImageView[Constant.NUMBER_OF_BANNER];
 
         for (int i = 0; i < Constant.NUMBER_OF_BANNER; i++) {
-            mImageDots[i] = new ImageView(getActivity());
+            imageDots[i] = new ImageView(getActivity());
             if (i == current_possion) {
-                mImageDots[i].setImageDrawable(
+                imageDots[i].setImageDrawable(
                         ContextCompat.getDrawable(getActivity(), R.drawable.active_dots));
             } else {
-                mImageDots[i].setImageDrawable(
+                imageDots[i].setImageDrawable(
                         ContextCompat.getDrawable(getActivity(), R.drawable.unactive_dots));
             }
             LinearLayout.LayoutParams layoutParams =
@@ -81,7 +81,7 @@ public class HomeFragment extends Fragment
                             ViewGroup.LayoutParams.WRAP_CONTENT);
             layoutParams.setMargins(Constant.MARGIN_LEFT_RIGHT_DOTS, 0,
                     Constant.MARGIN_LEFT_RIGHT_DOTS, 0);
-            mLinearDots.addView(mImageDots[i], layoutParams);
+            mLinearDots.addView(imageDots[i], layoutParams);
         }
     }
 
@@ -101,14 +101,28 @@ public class HomeFragment extends Fragment
     }
 
     @Override
-    public void onGetSongByGenreSuccess(MoreSong moreSong) {
-        // for testing
-        System.out.println(moreSong.getSongsList().get(0).getTitle());
-    }
-
-    @Override
-    public void onError(Exception ex) {
-        // FOR TESTING
-        System.out.println(ex.getMessage());
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.button_all_audios:
+                startActivity(new Intent(
+                        SongByGenreActivity.getInstance(getContext(), TypeGenre.ALL_AUDIO)));
+                break;
+            case R.id.button_all_song:
+                startActivity(new Intent(
+                        SongByGenreActivity.getInstance(getContext(), TypeGenre.ALL_MUSIC)));
+                break;
+            case R.id.button_alternativerock:
+                startActivity(new Intent(
+                        SongByGenreActivity.getInstance(getContext(), TypeGenre.ALTERNATIVEROCK)));
+                break;
+            case R.id.button_ambient:
+                startActivity(new Intent(
+                        SongByGenreActivity.getInstance(getContext(), TypeGenre.AMBIENT)));
+                break;
+            case R.id.button_classic:
+                startActivity(new Intent(
+                        SongByGenreActivity.getInstance(getContext(), TypeGenre.CLASSICAL)));
+                break;
+        }
     }
 }

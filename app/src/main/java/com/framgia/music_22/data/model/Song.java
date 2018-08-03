@@ -109,42 +109,42 @@ public class Song implements Parcelable {
         }
 
         public Builder withSongId(String songId) {
-            this.mSongId = songId;
+            mSongId = songId;
             return this;
         }
 
         public Builder withTitle(String title) {
-            this.mTitle = title;
+            mTitle = title;
             return this;
         }
 
         public Builder withGenre(String genre) {
-            this.mGenre = genre;
+            mGenre = genre;
             return this;
         }
 
         public Builder withUserId(String userId) {
-            this.mUserId = userId;
+            mUserId = userId;
             return this;
         }
 
         public Builder withStreamUrl(String streamUrl) {
-            this.mStreamUrl = streamUrl;
+            mStreamUrl = streamUrl;
             return this;
         }
 
         public Builder withDuaration(int duaration) {
-            this.mDuaration = duaration;
+            mDuaration = duaration;
             return this;
         }
 
         public Builder withUri(String uri) {
-            this.mUri = uri;
+            mUri = uri;
             return this;
         }
 
         public Builder withArtist(Artist artist) {
-            this.mArtist = artist;
+            mArtist = artist;
             return this;
         }
 

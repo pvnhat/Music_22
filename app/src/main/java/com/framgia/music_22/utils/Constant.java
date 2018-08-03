@@ -30,6 +30,7 @@ public class Constant {
     public static final String CLIENT_ID = "?client_id=" + BuildConfig.API_KEY;
     public static final String GENRES_URL =
             BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&genres=";
+    public static final String LIMIT_NUMBER = "&limit=40";
     public static final String ARRAY_JSON_NAME = "collection";
     public static final String NEXT_HREF = "next_href";
 
