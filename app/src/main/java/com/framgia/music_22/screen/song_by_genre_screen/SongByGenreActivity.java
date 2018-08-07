@@ -9,9 +9,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 import com.framgia.music_22.data.model.MoreSong;
+import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.repository.SongRepository;
 import com.framgia.music_22.data.source.ParseRemoteJsonData;
+import com.framgia.music_22.screen.play_music_screen.PlayMusicActivity;
 import com.framgia.vnnht.music_22.R;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SongByGenreActivity extends AppCompatActivity
         implements OnItemClickListener, SongByGenreContract.View {
@@ -19,6 +23,8 @@ public class SongByGenreActivity extends AppCompatActivity
     private static final String EXTRA_MORE_SONG = "EXTRA_MORE_SONG";
 
     private SongByGenreAdapter mAdapter;
+    private String mGenre;
+    private List<Song> mSongList;
 
     public static Intent getInstance(Context context, String genre) {
         Intent intent = new Intent(context, SongByGenreActivity.class);
@@ -43,21 +49,22 @@ public class SongByGenreActivity extends AppCompatActivity
     }
 
     private void initData() {
-        String genre = getIntent().getStringExtra(EXTRA_MORE_SONG);
-        onSetActionBar(genre);
+        mGenre = getIntent().getStringExtra(EXTRA_MORE_SONG);
+        onSetActionBar(mGenre);
         SongRepository songRepository =
                 SongRepository.getsInstance(ParseRemoteJsonData.getInstance());
         SongByGenreContract.Presenter presenter = new SongByGenrePresenter(this, songRepository);
-        presenter.getSongByGenres(genre);
+        presenter.getSongByGenres(mGenre);
     }
 
     @Override
     public void onItemClick(int position) {
-        // do something
+        startActivity(new Intent(PlayMusicActivity.getInstance(this, mSongList, position)));
     }
 
     @Override
     public void onGetSongByGenreSuccess(MoreSong moreSong) {
+        mSongList = moreSong.getSongsList();
         if (moreSong != null && moreSong.getSongsList() != null) {
             mAdapter.updateSongList(moreSong.getSongsList());
         }

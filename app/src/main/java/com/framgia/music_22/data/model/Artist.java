@@ -9,9 +9,6 @@ public class Artist implements Parcelable {
     private String mAvatarUrl;
     private String mSingerName;
 
-    protected Artist(Parcel in) {
-    }
-
     public Artist(String singerId, String singerName, String avatarUrl) {
         mSingerId = singerId;
         mAvatarUrl = avatarUrl;
@@ -68,6 +65,12 @@ public class Artist implements Parcelable {
         parcel.writeString(mSingerId);
         parcel.writeString(mAvatarUrl);
         parcel.writeString(mSingerName);
+    }
+
+    protected Artist(Parcel in) {
+        mSingerId = in.readString();
+        mAvatarUrl = in.readString();
+        mSingerName = in.readString();
     }
 
     public class APIArtistProperties {
