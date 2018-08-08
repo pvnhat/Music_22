@@ -4,17 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 import com.framgia.music_22.data.model.MoreSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.repository.SongRepository;
-import com.framgia.music_22.data.source.ParseRemoteJsonData;
+import com.framgia.music_22.data.source.local.SongLocalDataSource;
+import com.framgia.music_22.data.source.remote.SongRemoteDataSource;
 import com.framgia.music_22.screen.play_music_screen.PlayMusicActivity;
 import com.framgia.vnnht.music_22.R;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SongByGenreActivity extends AppCompatActivity
@@ -52,7 +50,8 @@ public class SongByGenreActivity extends AppCompatActivity
         mGenre = getIntent().getStringExtra(EXTRA_MORE_SONG);
         onSetActionBar(mGenre);
         SongRepository songRepository =
-                SongRepository.getsInstance(ParseRemoteJsonData.getInstance());
+                SongRepository.getsInstance(SongRemoteDataSource.getInstance(),
+                        SongLocalDataSource.getInstance(getApplicationContext()));
         SongByGenreContract.Presenter presenter = new SongByGenrePresenter(this, songRepository);
         presenter.getSongByGenres(mGenre);
     }

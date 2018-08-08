@@ -1,28 +1,35 @@
 package com.framgia.music_22.data.repository;
 
-import com.framgia.music_22.data.GetSongDataSource;
+import com.framgia.music_22.data.CallBackOfflineSong;
 import com.framgia.music_22.data.RequestCallbackData;
+import com.framgia.music_22.data.SongDataSource;
 import com.framgia.music_22.data.model.MoreSong;
-import com.framgia.music_22.data.source.ParseRemoteJsonData;
 
-public class SongRepository implements GetSongDataSource.RemoteDataSource {
+public class SongRepository {
     private static SongRepository sInstance;
-    private ParseRemoteJsonData mParseRemoteJsonData;
+    private SongDataSource.RemoteDataSource mParseRemoteJsonData;
+    private SongDataSource.LocalDataSource mSongLocalDataSource;
 
-    private SongRepository(ParseRemoteJsonData parseRemoteJsonData) {
+    private SongRepository(SongDataSource.RemoteDataSource parseRemoteJsonData,
+            SongDataSource.LocalDataSource songLocalDataSource) {
         mParseRemoteJsonData = parseRemoteJsonData;
+        mSongLocalDataSource = songLocalDataSource;
     }
 
     public static synchronized SongRepository getsInstance(
-            ParseRemoteJsonData parseRemoteJsonData) {
+            SongDataSource.RemoteDataSource remoteDataSource,
+            SongDataSource.LocalDataSource localDataSource) {
         if (sInstance == null) {
-            sInstance = new SongRepository(parseRemoteJsonData);
+            sInstance = new SongRepository(remoteDataSource, localDataSource);
         }
         return sInstance;
     }
 
-    @Override
     public void getSongByGenre(String genre, RequestCallbackData<MoreSong> callbackData) {
         mParseRemoteJsonData.getSongByGenre(genre, callbackData);
+    }
+
+    public void getLocalMusic(CallBackOfflineSong callbackData) {
+        mSongLocalDataSource.getData(callbackData);
     }
 }

@@ -1,7 +1,6 @@
 package com.framgia.music_22.screen.play_music_screen;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,12 +19,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.bumptech.glide.Glide;
-import com.framgia.music_22.data.model.MoreSong;
 import com.framgia.music_22.data.model.Song;
-import com.framgia.music_22.data.repository.SongRepository;
-import com.framgia.music_22.data.source.ParseRemoteJsonData;
 import com.framgia.vnnht.music_22.R;
 import de.hdodenhof.circleimageview.CircleImageView;
 import java.text.SimpleDateFormat;
@@ -60,7 +55,6 @@ public class PlayMusicActivity extends AppCompatActivity
         intent.putExtra(EXTRA_PLAY_SONG_POSITION, position);
         return intent;
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,8 +200,6 @@ public class PlayMusicActivity extends AppCompatActivity
     private void onRequestStoragePermisson() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, R.string.text_inform_to_client_permisson, Toast.LENGTH_SHORT)
-                    .show();
             mPlayMusicService.downloadSong();
         } else {
             ActivityCompat.requestPermissions(this,

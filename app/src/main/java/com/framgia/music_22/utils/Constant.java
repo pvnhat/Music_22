@@ -33,4 +33,8 @@ public class Constant {
     public static final String LIMIT_NUMBER = "&limit=40";
     public static final String ARRAY_JSON_NAME = "collection";
     public static final String NEXT_HREF = "next_href";
+
+    // Local Data
+    public static final String PREF_SONG_DETAIL = "PREF_SONG_DETAIL";
+    public static final String PREF_SONG_DATA = "PREF_SONG_DATA";
 }
