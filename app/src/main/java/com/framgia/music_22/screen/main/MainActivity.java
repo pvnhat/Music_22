@@ -6,13 +6,20 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import com.framgia.music_22.utils.Constant;
+import com.framgia.music_22.data.source.local.sqlite.DatabaseSQLite;
 import com.framgia.music_22.utils.TypeTab;
 import com.framgia.vnnht.music_22.R;
 
 public class MainActivity extends AppCompatActivity
         implements BottomNavigationView.OnNavigationItemSelectedListener,
         ViewPager.OnPageChangeListener {
+
+    private static final String SONG_ID = "SongId";
+    private static final String TITLE = "Title";
+    private static final String GENRE = "Genre";
+    private static final String SONG_PATH = "SongPath";
+    private static final String ARTIST_NAME = "ArtistName";
+    private static final String DUARATION = "Duaration";
 
     private ViewPager mPagerMain;
     private BottomNavigationView mBottomNavigationViewavigation;
@@ -23,6 +30,18 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initFragment();
+        initDatabase();
+    }
+
+    private void initDatabase() {
+        DatabaseSQLite databaseSQLite = new DatabaseSQLite(this);
+        databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS " + DatabaseSQLite.TABLE_NAME + " ("
+                + SONG_ID + "TEXT PRIMARY KEY,"
+                + TITLE + "TEXT,"
+                + GENRE + "TEXT,"
+                + SONG_PATH + "TEXT,"
+                + ARTIST_NAME + "TEXT,"
+                + DUARATION + "INTEGER)");
     }
 
     @Override

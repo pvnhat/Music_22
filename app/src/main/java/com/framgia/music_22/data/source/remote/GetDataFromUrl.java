@@ -1,4 +1,4 @@
-package com.framgia.music_22.data.source;
+package com.framgia.music_22.data.source.remote;
 
 import android.os.AsyncTask;
 import com.framgia.music_22.data.OnFetchDataListener;

@@ -1,8 +1,11 @@
 package com.framgia.music_22.screen.main;
 
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import com.framgia.music_22.screen.gernes_screen.GenreFragment;
 import com.framgia.music_22.screen.home_screen.HomeFragment;
 import com.framgia.music_22.screen.offline_screen.OfflineFragment;
@@ -10,7 +13,7 @@ import com.framgia.music_22.screen.singer_screen.SingerFragment;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeTab;
 
-public class MainPagerAdapter extends FragmentPagerAdapter {
+public class MainPagerAdapter extends FragmentStatePagerAdapter {
 
     public MainPagerAdapter(FragmentManager fm) {
         super(fm);
@@ -35,5 +38,10 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     @Override
     public int getCount() {
         return Constant.TAB_COUNT;
+    }
+
+    @Override
+    public int getItemPosition(@NonNull Object object) {
+        return POSITION_NONE;
     }
 }

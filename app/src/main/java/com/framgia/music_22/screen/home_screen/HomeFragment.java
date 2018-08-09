@@ -1,6 +1,5 @@
 package com.framgia.music_22.screen.home_screen;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,9 +13,6 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import com.framgia.music_22.data.model.MoreSong;
-import com.framgia.music_22.data.repository.SongRepository;
-import com.framgia.music_22.data.source.ParseRemoteJsonData;
 import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreActivity;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;

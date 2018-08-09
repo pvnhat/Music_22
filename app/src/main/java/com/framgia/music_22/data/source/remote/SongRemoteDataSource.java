@@ -1,6 +1,6 @@
-package com.framgia.music_22.data.source;
+package com.framgia.music_22.data.source.remote;
 
-import com.framgia.music_22.data.GetSongDataSource;
+import com.framgia.music_22.data.SongDataSource;
 import com.framgia.music_22.data.OnFetchDataListener;
 import com.framgia.music_22.data.RequestCallbackData;
 import com.framgia.music_22.data.model.Artist;
@@ -12,12 +12,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ParseRemoteJsonData implements GetSongDataSource.RemoteDataSource {
-    private static ParseRemoteJsonData sInstance;
+public class SongRemoteDataSource implements SongDataSource.RemoteDataSource {
+    private static SongRemoteDataSource sInstance;
 
-    public static synchronized ParseRemoteJsonData getInstance() {
+    public static synchronized SongRemoteDataSource getInstance() {
         if (sInstance == null) {
-            sInstance = new ParseRemoteJsonData();
+            sInstance = new SongRemoteDataSource();
         }
         return sInstance;
     }
