@@ -21,6 +21,8 @@ import com.framgia.vnnht.music_22.R;
 public class HomeFragment extends Fragment
         implements HomePageContract.View, ViewPager.OnPageChangeListener, View.OnClickListener {
 
+    private static final String TEXT_GENRE = "genres=";
+
     private LinearLayout mLinearDots;
 
     public static HomeFragment newInstance() {
@@ -100,24 +102,24 @@ public class HomeFragment extends Fragment
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_all_audios:
-                startActivity(new Intent(
-                        SongByGenreActivity.getInstance(getContext(), TypeGenre.ALL_AUDIO)));
+                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
+                        TEXT_GENRE + TypeGenre.ALL_AUDIO)));
                 break;
             case R.id.button_all_song:
-                startActivity(new Intent(
-                        SongByGenreActivity.getInstance(getContext(), TypeGenre.ALL_MUSIC)));
+                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
+                        TEXT_GENRE + TypeGenre.ALL_MUSIC)));
                 break;
             case R.id.button_alternativerock:
-                startActivity(new Intent(
-                        SongByGenreActivity.getInstance(getContext(), TypeGenre.ALTERNATIVEROCK)));
+                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
+                        TEXT_GENRE + TypeGenre.ALTERNATIVEROCK)));
                 break;
             case R.id.button_ambient:
-                startActivity(new Intent(
-                        SongByGenreActivity.getInstance(getContext(), TypeGenre.AMBIENT)));
+                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
+                        TEXT_GENRE + TypeGenre.AMBIENT)));
                 break;
             case R.id.button_classic:
-                startActivity(new Intent(
-                        SongByGenreActivity.getInstance(getContext(), TypeGenre.CLASSICAL)));
+                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
+                        TEXT_GENRE + TypeGenre.CLASSICAL)));
                 break;
         }
     }

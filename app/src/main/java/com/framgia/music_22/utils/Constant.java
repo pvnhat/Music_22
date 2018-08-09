@@ -29,12 +29,8 @@ public class Constant {
     public static final String BASE_URL = "http://api.soundcloud.com";
     public static final String CLIENT_ID = "?client_id=" + BuildConfig.API_KEY;
     public static final String GENRES_URL =
-            BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&genres=";
-    public static final String LIMIT_NUMBER = "&limit=40";
+            BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&";
+    public static final String LIMIT_NUMBER = "&limit=51";
     public static final String ARRAY_JSON_NAME = "collection";
     public static final String NEXT_HREF = "next_href";
-
-    // Local Data
-    public static final String PREF_SONG_DETAIL = "PREF_SONG_DETAIL";
-    public static final String PREF_SONG_DATA = "PREF_SONG_DATA";
 }

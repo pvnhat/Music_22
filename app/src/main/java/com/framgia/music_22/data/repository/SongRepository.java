@@ -25,7 +25,7 @@ public class SongRepository {
         return sInstance;
     }
 
-    public void getSongByGenre(String genre, RequestCallbackData<MoreSong> callbackData) {
+    public void getOnlineMusic(String genre, RequestCallbackData<MoreSong> callbackData) {
         mParseRemoteJsonData.getSongByGenre(genre, callbackData);
     }
 

@@ -36,12 +36,12 @@ public class MainActivity extends AppCompatActivity
     private void initDatabase() {
         DatabaseSQLite databaseSQLite = new DatabaseSQLite(this);
         databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS " + DatabaseSQLite.TABLE_NAME + " ("
-                + SONG_ID + "TEXT PRIMARY KEY,"
-                + TITLE + "TEXT,"
-                + GENRE + "TEXT,"
-                + SONG_PATH + "TEXT,"
-                + ARTIST_NAME + "TEXT,"
-                + DUARATION + "INTEGER)");
+                + SONG_ID + " TEXT PRIMARY KEY,"
+                + TITLE + " TEXT,"
+                + GENRE + " TEXT,"
+                + SONG_PATH + " TEXT,"
+                + ARTIST_NAME + " TEXT,"
+                + DUARATION + " INTEGER)");
     }
 
     @Override
