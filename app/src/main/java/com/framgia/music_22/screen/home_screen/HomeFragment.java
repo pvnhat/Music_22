@@ -13,7 +13,9 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreActivity;
+import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;
 import com.framgia.vnnht.music_22.R;
@@ -21,9 +23,8 @@ import com.framgia.vnnht.music_22.R;
 public class HomeFragment extends Fragment
         implements HomePageContract.View, ViewPager.OnPageChangeListener, View.OnClickListener {
 
-    private static final String TEXT_GENRE = "genres=";
-
     private LinearLayout mLinearDots;
+    private ConnectionChecking mConnectionChecking;
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -46,6 +47,7 @@ public class HomeFragment extends Fragment
         ImageButton buttonAlternativeRock = view.findViewById(R.id.button_alternativerock);
         ImageButton buttonAmbient = view.findViewById(R.id.button_ambient);
         ImageButton buttonClassic = view.findViewById(R.id.button_classic);
+        mConnectionChecking = new ConnectionChecking(getContext().getApplicationContext());
 
         viewPagerBanner.setOnPageChangeListener(this);
         buttonAllAudio.setOnClickListener(this);
@@ -102,25 +104,29 @@ public class HomeFragment extends Fragment
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_all_audios:
-                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
-                        TEXT_GENRE + TypeGenre.ALL_AUDIO)));
+                checkConnection(TypeGenre.ALL_AUDIO);
                 break;
             case R.id.button_all_song:
-                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
-                        TEXT_GENRE + TypeGenre.ALL_MUSIC)));
+                checkConnection(TypeGenre.ALL_MUSIC);
                 break;
             case R.id.button_alternativerock:
-                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
-                        TEXT_GENRE + TypeGenre.ALTERNATIVEROCK)));
+                checkConnection(TypeGenre.ALTERNATIVEROCK);
                 break;
             case R.id.button_ambient:
-                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
-                        TEXT_GENRE + TypeGenre.AMBIENT)));
+                checkConnection(TypeGenre.AMBIENT);
                 break;
             case R.id.button_classic:
-                startActivity(new Intent(SongByGenreActivity.getInstance(getContext(),
-                        TEXT_GENRE + TypeGenre.CLASSICAL)));
+                checkConnection(TypeGenre.CLASSICAL);
                 break;
+        }
+    }
+
+    private void checkConnection(String genre) {
+        if (mConnectionChecking.isNetworkConnection()) {
+            startActivity(new Intent(SongByGenreActivity.getInstance(getContext(), genre)));
+        } else {
+            Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
+                    .show();
         }
     }
 }
