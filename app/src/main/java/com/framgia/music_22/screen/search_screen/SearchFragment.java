@@ -20,6 +20,7 @@ import com.framgia.music_22.data.source.remote.SongRemoteDataSource;
 import com.framgia.music_22.screen.play_music_screen.PlayMusicActivity;
 import com.framgia.music_22.screen.song_by_genre_screen.OnItemClickListener;
 import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreAdapter;
+import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.vnnht.music_22.R;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,7 @@ public class SearchFragment extends Fragment
     private SearchContract.Presenter mPresenter;
     private SongByGenreAdapter mAdapter;
     private List<Song> mSongList;
+    private ConnectionChecking mConnectionChecking;
 
     public static SearchFragment newInstance() {
         return new SearchFragment();
@@ -52,6 +54,7 @@ public class SearchFragment extends Fragment
         mEditSearchBox = view.findViewById(R.id.edit_search_box);
         ImageButton buttonSearch = view.findViewById(R.id.button_search);
         mRecyclerSearchedList = view.findViewById(R.id.recycler_searched_song);
+        mConnectionChecking = new ConnectionChecking(getContext().getApplicationContext());
         mRecyclerSearchedList.setHasFixedSize(true);
         mAdapter = new SongByGenreAdapter(getContext());
         mAdapter.setOnItemClickListener(this);
@@ -85,9 +88,12 @@ public class SearchFragment extends Fragment
     public void onClick(View view) {
         String keyName = mEditSearchBox.getText().toString();
         if (!keyName.isEmpty()) {
-            mPresenter.getSongByTitle(LINK_TO_SERACH + keyName);
-        } else {
             Toast.makeText(getContext(), R.string.text_search_inform, Toast.LENGTH_SHORT).show();
+        } else if (!mConnectionChecking.isNetworkConnection()) {
+            Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
+                    .show();
+        } else {
+            mPresenter.getSongByTitle(LINK_TO_SERACH + keyName);
         }
     }
 

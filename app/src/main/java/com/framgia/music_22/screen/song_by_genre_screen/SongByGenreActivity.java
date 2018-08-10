@@ -19,7 +19,6 @@ public class SongByGenreActivity extends AppCompatActivity
         implements OnItemClickListener, SongByGenreContract.View {
 
     private static final String EXTRA_MORE_SONG = "EXTRA_MORE_SONG";
-    private static final int NUMBER_INDEX = 7;
 
     private SongByGenreAdapter mAdapter;
     private String mGenre;
@@ -76,7 +75,7 @@ public class SongByGenreActivity extends AppCompatActivity
     }
 
     private void onSetActionBar(String genre) {
-        getSupportActionBar().setTitle(genre.substring(NUMBER_INDEX));
+        getSupportActionBar().setTitle(genre);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 

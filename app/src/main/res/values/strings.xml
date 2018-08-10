@@ -22,4 +22,6 @@
     <string name="text_inforn_downloaded_song">You have already downloaded this song !</string>
     <string name="title_search">Search</string>
     <string name="text_search_inform">Input song name !</string>
+    <string name="text_connection_information">There is no connection</string>
+    <string name="text_last_song_if">Last song in list !</string>
 </resources>
