@@ -30,8 +30,10 @@ import java.util.List;
 
 public class PlayMusicService extends Service {
 
-    private static final String EXTRA_MUSIC_LIST = "EXTRA_MUSIC_LIST";
+    private static final String EXTRA_PLAY_SONG_ONLINE_LIST = "EXTRA_PLAY_SONG_ONLINE_LIST";
+    private static final String EXTRA_PLAY_SONG_OFFLINE_LIST = "EXTRA_PLAY_SONG_OFFLINE_LIST";
     private static final String EXTRA_MUSIC_POSITION = "EXTRA_MUSIC_POSITION";
+    private static final String EXTRA_IS_OFFLINE = "EXTRA_PLAY_SONG_POSITION";
     private static final int DELAY_TIME = 1000;
     private static final String FILE_DIR = "file://\" + \"/sdcard/Music/";
     private static final String MP3_FORMAT = ".mp3";
@@ -41,15 +43,26 @@ public class PlayMusicService extends Service {
     private IBinder mIBinder = new LocalBinder();
     private int mPosition = 0;
     private MediaPlayer mMediaPlayer;
-    private List<Song> mSongList = new ArrayList<>();
+    private List<Song> mOnlineSongList = new ArrayList<>();
+    private List<OfflineSong> mOfflineSongList = new ArrayList<>();
+    private boolean mIsOffline;
     DatabaseSQLite mDatabaseSQLite = new DatabaseSQLite(this);
-    private List<OfflineSong> mOfflineSongList;
 
-    public static Intent getInstance(Context context, List<Song> songList, int position) {
+    public static Intent getOnlineInstance(Context context, List<Song> songList, int position) {
         Intent intent = new Intent(context, PlayMusicService.class);
-        intent.putParcelableArrayListExtra(EXTRA_MUSIC_LIST,
+        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST,
                 (ArrayList<? extends Parcelable>) songList);
         intent.putExtra(EXTRA_MUSIC_POSITION, position);
+        return intent;
+    }
+
+    public static Intent getOfflineInstance(Context context, List<OfflineSong> songList,
+            int position, boolean isOffline) {
+        Intent intent = new Intent(context, PlayMusicService.class);
+        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST,
+                (ArrayList<? extends Parcelable>) songList);
+        intent.putExtra(EXTRA_MUSIC_POSITION, position);
+        intent.putExtra(EXTRA_IS_OFFLINE, isOffline);
         return intent;
     }
 
@@ -69,9 +82,15 @@ public class PlayMusicService extends Service {
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
         }
-        mSongList = intent.getParcelableArrayListExtra(EXTRA_MUSIC_LIST);
         int position = intent.getIntExtra(EXTRA_MUSIC_POSITION, 0);
-        onPlayMusicOnlineService(mSongList, position);
+        mIsOffline = intent.getBooleanExtra(EXTRA_IS_OFFLINE, false);
+        if (intent.getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
+            mOnlineSongList = intent.getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST);
+            onPlayMusicOnlineService(mOnlineSongList, position);
+        } else {
+            mOfflineSongList = intent.getParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST);
+            onPlayMusicOfflineService(mOfflineSongList, position);
+        }
         return START_NOT_STICKY;
     }
 
@@ -109,17 +128,63 @@ public class PlayMusicService extends Service {
         startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
     }
 
+    public void onPlayMusicOfflineService(List<OfflineSong> songList, int position) {
+        mPosition = position;
+        mMediaPlayer = new MediaPlayer();
+        try {
+            mMediaPlayer.setDataSource(songList.get(position).getSongPath());
+            mMediaPlayer.prepareAsync();
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(final MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mView.updateMediaToClient(mMediaPlayer);
+                            handler.postDelayed(this, DELAY_TIME);
+                            mediaPlayer.setOnCompletionListener(
+                                    new MediaPlayer.OnCompletionListener() {
+                                        @Override
+                                        public void onCompletion(MediaPlayer mediaPlayer) {
+                                            nextSong();
+                                        }
+                                    });
+                        }
+                    }, DELAY_TIME);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
+    }
+
     public Notification initForegroundService() {
+        Notification notification;
         Intent notitificationInten = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notitificationInten, 0);
-        Notification notification = new NotificationCompat.Builder(this).setContentTitle(
-                getString(R.string.text_notification_playing))
-                .setAutoCancel(true)
-                .setSmallIcon(R.drawable.ic_notification_playing)
-                .setContentTitle(mSongList.get(mPosition).getTitle())
-                .setContentIntent(pendingIntent)
-                .setWhen(System.currentTimeMillis())
-                .build();
+        if (mIsOffline == false) {
+            notification = new NotificationCompat.Builder(this).setContentTitle(
+                    getString(R.string.text_notification_playing))
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_notification_playing)
+                    .setContentTitle(mOnlineSongList.get(mPosition).getTitle())
+                    .setContentIntent(pendingIntent)
+                    .setWhen(System.currentTimeMillis())
+                    .build();
+        } else {
+            notification = new NotificationCompat.Builder(this).setContentTitle(
+                    getString(R.string.text_notification_playing))
+                    .setAutoCancel(true)
+                    .setSmallIcon(R.drawable.ic_notification_playing)
+                    .setContentTitle(mOfflineSongList.get(mPosition).getTitle())
+                    .setContentIntent(pendingIntent)
+                    .setWhen(System.currentTimeMillis())
+                    .build();
+        }
+
         return notification;
     }
 
@@ -150,26 +215,45 @@ public class PlayMusicService extends Service {
     }
 
     public void nextSong() {
-        if (mPosition == mSongList.size()) {
-            mPosition = 0;
-        } else {
-            mPosition++;
-        }
         mMediaPlayer.release();
-        onPlayMusicOnlineService(mSongList, mPosition);
-        mView.getUpdateSongDetail(mSongList.get(mPosition));
+        if (mIsOffline == false) {
+            if (mPosition == mOnlineSongList.size()) {
+                mPosition = 0;
+            } else {
+                mPosition++;
+            }
+            onPlayMusicOnlineService(mOnlineSongList, mPosition);
+            mView.onUpdateOnlineSongDetail(mOnlineSongList.get(mPosition));
+        } else {
+            if (mPosition == mOfflineSongList.size()) {
+                mPosition = 0;
+            } else {
+                mPosition++;
+            }
+            onPlayMusicOfflineService(mOfflineSongList, mPosition);
+            mView.onUpdateOfflineSongDetail(mOfflineSongList.get(mPosition));
+        }
     }
 
     public void previousSong() {
-        if (mPosition == 0) {
-            mPosition = mSongList.size() - 1;
-        } else {
-            mPosition--;
-        }
         mMediaPlayer.release();
-        onPlayMusicOnlineService(mSongList, mPosition);
-        onPlayMusicOnlineService(mSongList, mPosition);
-        mView.getUpdateSongDetail(mSongList.get(mPosition));
+        if (mIsOffline == false) {
+            if (mPosition == 0) {
+                mPosition = mOnlineSongList.size() - 1;
+            } else {
+                mPosition--;
+            }
+            onPlayMusicOnlineService(mOnlineSongList, mPosition);
+            mView.onUpdateOnlineSongDetail(mOnlineSongList.get(mPosition));
+        } else {
+            if (mPosition == 0) {
+                mPosition = mOfflineSongList.size() - 1;
+            } else {
+                mPosition--;
+            }
+            onPlayMusicOfflineService(mOfflineSongList, mPosition);
+            mView.onUpdateOfflineSongDetail(mOfflineSongList.get(mPosition));
+        }
     }
 
     public void downloadSong() {
@@ -178,11 +262,12 @@ public class PlayMusicService extends Service {
         } else {
             DownloadManager downloadManager =
                     (DownloadManager) this.getSystemService(Context.DOWNLOAD_SERVICE);
-            Uri uriStream = Uri.parse(mSongList.get(mPosition).getStreamUrl() + Constant.CLIENT_ID);
-            String stringDir = FILE_DIR + mSongList.get(mPosition).getTitle() + MP3_FORMAT;
+            Uri uriStream =
+                    Uri.parse(mOnlineSongList.get(mPosition).getStreamUrl() + Constant.CLIENT_ID);
+            String stringDir = FILE_DIR + mOnlineSongList.get(mPosition).getTitle() + MP3_FORMAT;
             DownloadManager.Request request = new DownloadManager.Request(uriStream);
             request.setTitle(
-                    getString(R.string.text_download) + mSongList.get(mPosition).getTitle());
+                    getString(R.string.text_download) + mOnlineSongList.get(mPosition).getTitle());
             request.setDescription(getString(R.string.text_dowloading));
             request.setNotificationVisibility(
                     DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -193,7 +278,7 @@ public class PlayMusicService extends Service {
     }
 
     public void onSaveSongDetail(String songDir) {
-        Song song = mSongList.get(mPosition);
+        Song song = mOnlineSongList.get(mPosition);
         mOfflineSongList = new ArrayList<>();
         OfflineSong offlineSong = new OfflineSong.Builder().withSongId(song.getSongId())
                 .withTitle(song.getTitle())
@@ -222,8 +307,9 @@ public class PlayMusicService extends Service {
     private boolean checkDowloaded() {
         boolean wasDownloaded = false;
         Cursor cursor = mDatabaseSQLite.getDataFromDatabase(
-                "SELECT * FROM " + DatabaseSQLite.TABLE_NAME + " WHERE SongId = '" + mSongList.get(
-                        mPosition).getSongId() + "'");
+                "SELECT * FROM " + DatabaseSQLite.TABLE_NAME + " WHERE SongId = '" + mOnlineSongList
+                        .get(mPosition)
+                        .getSongId() + "'");
         if (cursor.moveToFirst() && cursor.getCount() > 0) {
             wasDownloaded = true;
         }

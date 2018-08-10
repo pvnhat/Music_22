@@ -1,4 +1,4 @@
-package com.framgia.music_22.screen.song_by_genre_screen;
+package com.framgia.music_22.screen.offline_screen;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,23 +10,24 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
-import com.framgia.music_22.data.model.Song;
+import com.framgia.music_22.data.model.OfflineSong;
+import com.framgia.music_22.screen.song_by_genre_screen.OnItemClickListener;
 import com.framgia.vnnht.music_22.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SongByGenreAdapter extends RecyclerView.Adapter<SongByGenreAdapter.ViewHolder> {
+public class OfflineSongAdapter extends RecyclerView.Adapter<OfflineSongAdapter.ViewHolder> {
 
     private Context mContext;
-    private List<Song> mSongList;
+    private List<OfflineSong> mSongList;
     private OnItemClickListener mOnItemClickListener;
 
-    public SongByGenreAdapter(Context context) {
+    OfflineSongAdapter(Context context) {
         mContext = context;
         mSongList = new ArrayList<>();
     }
 
-    public void updateSongList(List<Song> songList) {
+    public void updateSongList(List<OfflineSong> songList) {
         if (mSongList != null) {
             mSongList.clear();
         }
@@ -73,11 +74,9 @@ public class SongByGenreAdapter extends RecyclerView.Adapter<SongByGenreAdapter.
         }
 
         void getViewHolder(ViewHolder holder, int position) {
-            Glide.with(mContext)
-                    .load(mSongList.get(position).getArtist().getAvatarUrl())
-                    .into(mImageAvatar);
+            Glide.with(mContext).load(R.drawable.image_offline_music).into(mImageAvatar);
             holder.mTextTitle.setText(mSongList.get(position).getTitle());
-            holder.mTextArtist.setText(mSongList.get(position).getArtist().getSingerName());
+            holder.mTextArtist.setText(mSongList.get(position).getArtistName());
         }
 
         @Override

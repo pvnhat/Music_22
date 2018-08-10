@@ -13,8 +13,8 @@
 
     <item
         android:id="@+id/item_singer"
-        android:icon="@drawable/ic_singer_page"
-        android:title="@string/title_singer"/>
+        android:icon="@drawable/ic_song_search"
+        android:title="@string/title_search"/>
     <item
         android:id="@+id/item_gernes"
         android:icon="@drawable/ic_different_squares"

@@ -20,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import com.bumptech.glide.Glide;
+import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.vnnht.music_22.R;
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -31,8 +32,11 @@ public class PlayMusicActivity extends AppCompatActivity
         implements View.OnClickListener, PlayMusicContract.View, MusicServiceContract,
         SeekBar.OnSeekBarChangeListener {
 
-    private static final String EXTRA_PLAY_SONG_LIST = "EXTRA_PLAY_SONG_LIST";
-    private static final String EXTRA_PLAY_SONG_POSITION = "EXTRA_PLAY_SONG_POSITION";
+    private static final String EXTRA_PLAY_SONG_ONLINE_LIST = "EXTRA_PLAY_SONG_ONLINE_LIST";
+    private static final String EXTRA_PLAY_SONG_OFFLINE_LIST = "EXTRA_PLAY_SONG_OFFLINE_LIST";
+    private static final String EXTRA_ONLINE_SONG_POSITION = "EXTRA_ONLINE_SONG_POSITION";
+    private static final String EXTRA_OFFLINE_SONG_POSITION = "EXTRA_OFFLINE_SONG_POSITION";
+    private static final String EXTRA_IS_OFFLINE = "EXTRA_PLAY_SONG_POSITION";
     private static final int REQUEST_PERMISSION_CODE = 69;
     private static final String TIME_FORMAT = "mm:ss";
 
@@ -41,18 +45,27 @@ public class PlayMusicActivity extends AppCompatActivity
     private TextView mTextTitle, mTextArtist, mTextCurrentTime, mTextDuarationTime;
     private CircleImageView mImageAvatar;
     private SeekBar mSeekBarProgressSong;
-    private List<Song> mSongList;
-    private int mPosition;
     private Animation mAnimation;
     private MediaPlayer mMediaPlayer;
+    private boolean mIsOffline;
     private PlayMusicService mPlayMusicService;
     private ServiceConnection mServiceConnection;
 
-    public static Intent getInstance(Context context, List<Song> songList, int position) {
+    public static Intent getOnlineInstance(Context context, List<Song> songList, int position) {
         Intent intent = new Intent(context, PlayMusicActivity.class);
-        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_LIST,
+        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST,
                 (ArrayList<? extends Parcelable>) songList);
-        intent.putExtra(EXTRA_PLAY_SONG_POSITION, position);
+        intent.putExtra(EXTRA_ONLINE_SONG_POSITION, position);
+        return intent;
+    }
+
+    public static Intent getOfflineInstance(Context context, List<OfflineSong> songList,
+            int position, boolean check) {
+        Intent intent = new Intent(context, PlayMusicActivity.class);
+        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST,
+                (ArrayList<? extends Parcelable>) songList);
+        intent.putExtra(EXTRA_OFFLINE_SONG_POSITION, position);
+        intent.putExtra(EXTRA_IS_OFFLINE, check);
         return intent;
     }
 
@@ -145,12 +158,21 @@ public class PlayMusicActivity extends AppCompatActivity
     }
 
     private void initData() {
-        mSongList = getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_LIST);
-        mPosition = getIntent().getIntExtra(EXTRA_PLAY_SONG_POSITION, -1);
-        onPlayMusicControl(mSongList, mPosition);
+        mIsOffline = getIntent().getBooleanExtra(EXTRA_IS_OFFLINE, false);
+        if (getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
+            int position = getIntent().getIntExtra(EXTRA_ONLINE_SONG_POSITION, -1);
+            List<Song> songOnlineList =
+                    getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST);
+            onPlayMusicOnlineControl(songOnlineList, position);
+        } else {
+            int position = getIntent().getIntExtra(EXTRA_OFFLINE_SONG_POSITION, -1);
+            List<OfflineSong> songOfflineList =
+                    getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST);
+            onPlayMusicOfflineControl(songOfflineList, position, mIsOffline);
+        }
     }
 
-    private void onPlayMusicControl(List<Song> songs, int position) {
+    private void onPlayMusicOnlineControl(List<Song> songs, int position) {
         mTextTitle.setText(songs.get(position).getTitle());
         mTextArtist.setText(songs.get(position).getArtist().getSingerName());
         mButtonPlay.setImageResource(R.drawable.ic_pause_button);
@@ -159,8 +181,25 @@ public class PlayMusicActivity extends AppCompatActivity
         onPlayMusicOnline(songs, position);
     }
 
+    private void onPlayMusicOfflineControl(List<OfflineSong> songs, int position,
+            boolean isOffline) {
+        mTextTitle.setText(songs.get(position).getTitle());
+        mTextArtist.setText(songs.get(position).getArtistName());
+        mButtonPlay.setImageResource(R.drawable.ic_pause_button);
+        mImageAvatar.setAnimation(mAnimation);
+        mButtonDownload.setVisibility(View.INVISIBLE);
+        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
+        onPlayMusicOffline(songs, position, isOffline);
+    }
+
     public void onPlayMusicOnline(List<Song> songList, int position) {
-        Intent intent = PlayMusicService.getInstance(this, songList, position);
+        Intent intent = PlayMusicService.getOnlineInstance(this, songList, position);
+        startService(intent);
+        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    public void onPlayMusicOffline(List<OfflineSong> songList, int position, boolean isOffline) {
+        Intent intent = PlayMusicService.getOfflineInstance(this, songList, position, isOffline);
         startService(intent);
         bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
@@ -176,10 +215,17 @@ public class PlayMusicActivity extends AppCompatActivity
     }
 
     @Override
-    public void getUpdateSongDetail(Song song) {
+    public void onUpdateOnlineSongDetail(Song song) {
         mTextTitle.setText(song.getTitle());
         mTextArtist.setText(song.getArtist().getSingerName());
         Glide.with(this).load(song.getArtist().getAvatarUrl()).into(mImageAvatar);
+    }
+
+    @Override
+    public void onUpdateOfflineSongDetail(OfflineSong song) {
+        mTextTitle.setText(song.getTitle());
+        mTextArtist.setText(song.getArtistName());
+        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
     }
 
     @Override
@@ -194,7 +240,9 @@ public class PlayMusicActivity extends AppCompatActivity
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        mMediaPlayer.seekTo(seekBar.getProgress());
+        if (mMediaPlayer != null) {
+            mMediaPlayer.seekTo(seekBar.getProgress());
+        }
     }
 
     private void onRequestStoragePermisson() {
