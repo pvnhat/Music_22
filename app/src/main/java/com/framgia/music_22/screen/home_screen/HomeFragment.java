@@ -102,31 +102,33 @@ public class HomeFragment extends Fragment
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.button_all_audios:
-                checkConnection(TypeGenre.ALL_AUDIO);
-                break;
-            case R.id.button_all_song:
-                checkConnection(TypeGenre.ALL_MUSIC);
-                break;
-            case R.id.button_alternativerock:
-                checkConnection(TypeGenre.ALTERNATIVEROCK);
-                break;
-            case R.id.button_ambient:
-                checkConnection(TypeGenre.AMBIENT);
-                break;
-            case R.id.button_classic:
-                checkConnection(TypeGenre.CLASSICAL);
-                break;
-        }
-    }
-
-    private void checkConnection(String genre) {
         if (mConnectionChecking.isNetworkConnection()) {
-            startActivity(new Intent(SongByGenreActivity.getInstance(getContext(), genre)));
+            switch (view.getId()) {
+                case R.id.button_all_audios:
+                    onClickToStartActivity(TypeGenre.ALL_AUDIO);
+                    break;
+                case R.id.button_all_song:
+                    onClickToStartActivity(TypeGenre.ALL_MUSIC);
+                    break;
+                case R.id.button_alternativerock:
+                    onClickToStartActivity(TypeGenre.ALTERNATIVEROCK);
+                    break;
+                case R.id.button_ambient:
+                    onClickToStartActivity(TypeGenre.AMBIENT);
+                    break;
+                case R.id.button_classic:
+                    onClickToStartActivity(TypeGenre.CLASSICAL);
+                    break;
+            }
         } else {
             Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
                     .show();
         }
+    }
+
+    public void onClickToStartActivity(String linkTo) {
+        startActivity(new Intent(
+                SongByGenreActivity.getInstance(getContext(), Constant.GENRES_URL + linkTo,
+                        linkTo)));
     }
 }

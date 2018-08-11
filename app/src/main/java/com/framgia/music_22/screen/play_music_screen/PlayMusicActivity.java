@@ -39,6 +39,7 @@ public class PlayMusicActivity extends AppCompatActivity
     private static final String EXTRA_IS_OFFLINE = "EXTRA_PLAY_SONG_POSITION";
     private static final int REQUEST_PERMISSION_CODE = 69;
     private static final String TIME_FORMAT = "mm:ss";
+    private static final int CHECK_LOOP_ONE = 4;
 
     private ImageButton mButtonBack, mButtonPrevious, mButtonPlay, mButtonNext, mButtonLoop,
             mButtonShuffle, mButtonDownload;
@@ -47,7 +48,7 @@ public class PlayMusicActivity extends AppCompatActivity
     private SeekBar mSeekBarProgressSong;
     private Animation mAnimation;
     private MediaPlayer mMediaPlayer;
-    private boolean mIsOffline;
+    private int mCheckShuffleLoop = 1;
     private PlayMusicService mPlayMusicService;
     private ServiceConnection mServiceConnection;
 
@@ -143,22 +144,50 @@ public class PlayMusicActivity extends AppCompatActivity
                 }
                 break;
             case R.id.button_next:
-                mPlayMusicService.nextSong();
+                mPlayMusicService.nextSong(true);
                 mTextCurrentTime.setText(R.string.text_time);
                 mTextDuarationTime.setText(R.string.text_time);
                 break;
             case R.id.button_loop:
+                setViewLoopButton();
                 break;
             case R.id.button_shuffle:
+                setViewShuffleButton();
                 break;
             case R.id.button_download:
                 onRequestStoragePermisson();
                 break;
+            default:
         }
     }
 
+    private void setViewLoopButton() {
+        if (mCheckShuffleLoop == PlayMusicService.CHECK_NO_LOOP) {
+            mButtonLoop.setImageResource(R.drawable.ic_repeat_one);
+            mCheckShuffleLoop = CHECK_LOOP_ONE;
+        } else if (mCheckShuffleLoop == CHECK_LOOP_ONE) {
+            mButtonLoop.setImageResource(R.drawable.ic_active_loop_button);
+            mCheckShuffleLoop = PlayMusicService.CHECK_LOOP_ALL;
+        } else {
+            mButtonLoop.setImageResource(R.drawable.ic_unactive_loop_button);
+            mCheckShuffleLoop = PlayMusicService.CHECK_NO_LOOP;
+        }
+        mPlayMusicService.setSuffleLoop(mCheckShuffleLoop);
+    }
+
+    private void setViewShuffleButton() {
+        if (mCheckShuffleLoop != PlayMusicService.CHECK_SHUFFLE) {
+            mButtonShuffle.setImageResource(R.drawable.ic_active_shuffle_button);
+            mCheckShuffleLoop = PlayMusicService.CHECK_SHUFFLE;
+        } else {
+            mButtonShuffle.setImageResource(R.drawable.ic_unactive_shuffle_button);
+            mCheckShuffleLoop = PlayMusicService.CHECK_NO_LOOP;
+        }
+        mPlayMusicService.setSuffleLoop(mCheckShuffleLoop);
+    }
+
     private void initData() {
-        mIsOffline = getIntent().getBooleanExtra(EXTRA_IS_OFFLINE, false);
+        boolean isOffline = getIntent().getBooleanExtra(EXTRA_IS_OFFLINE, false);
         if (getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
             int position = getIntent().getIntExtra(EXTRA_ONLINE_SONG_POSITION, -1);
             List<Song> songOnlineList =
@@ -168,7 +197,7 @@ public class PlayMusicActivity extends AppCompatActivity
             int position = getIntent().getIntExtra(EXTRA_OFFLINE_SONG_POSITION, -1);
             List<OfflineSong> songOfflineList =
                     getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST);
-            onPlayMusicOfflineControl(songOfflineList, position, mIsOffline);
+            onPlayMusicOfflineControl(songOfflineList, position, isOffline);
         }
     }
 
@@ -208,10 +237,15 @@ public class PlayMusicActivity extends AppCompatActivity
     public void updateMediaToClient(MediaPlayer mediaPlayer) {
         mMediaPlayer = mediaPlayer;
         SimpleDateFormat dateFormat = new SimpleDateFormat(TIME_FORMAT);
-        mTextCurrentTime.setText(dateFormat.format(mMediaPlayer.getCurrentPosition()));
-        mTextDuarationTime.setText(dateFormat.format(mMediaPlayer.getDuration()));
-        mSeekBarProgressSong.setMax(mMediaPlayer.getDuration());
-        mSeekBarProgressSong.setProgress(mediaPlayer.getCurrentPosition());
+        if (mMediaPlayer.isPlaying()) {
+            mTextCurrentTime.setText(dateFormat.format(mMediaPlayer.getCurrentPosition()));
+            mTextDuarationTime.setText(dateFormat.format(mMediaPlayer.getDuration()));
+            mSeekBarProgressSong.setMax(mMediaPlayer.getDuration());
+            mButtonPlay.setImageResource(R.drawable.ic_pause_button);
+            mSeekBarProgressSong.setProgress(mediaPlayer.getCurrentPosition());
+        } else {
+            mButtonPlay.setImageResource(R.drawable.ic_play_button);
+        }
     }
 
     @Override

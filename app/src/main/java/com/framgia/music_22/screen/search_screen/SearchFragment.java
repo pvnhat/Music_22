@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import com.framgia.music_22.data.SongDataSource;
 import com.framgia.music_22.data.model.MoreSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.repository.SongRepository;
@@ -21,8 +20,8 @@ import com.framgia.music_22.screen.play_music_screen.PlayMusicActivity;
 import com.framgia.music_22.screen.song_by_genre_screen.OnItemClickListener;
 import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreAdapter;
 import com.framgia.music_22.utils.ConnectionChecking;
+import com.framgia.music_22.utils.Constant;
 import com.framgia.vnnht.music_22.R;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SearchFragment extends Fragment
@@ -87,13 +86,13 @@ public class SearchFragment extends Fragment
     @Override
     public void onClick(View view) {
         String keyName = mEditSearchBox.getText().toString();
-        if (!keyName.isEmpty()) {
-            Toast.makeText(getContext(), R.string.text_search_inform, Toast.LENGTH_SHORT).show();
+        if (keyName.isEmpty()) {
+            mEditSearchBox.setError(getResources().getString(R.string.text_search_inform));
         } else if (!mConnectionChecking.isNetworkConnection()) {
             Toast.makeText(getContext(), R.string.text_connection_information, Toast.LENGTH_SHORT)
                     .show();
         } else {
-            mPresenter.getSongByTitle(LINK_TO_SERACH + keyName);
+            mPresenter.getSongByTitle(Constant.GENRES_URL + LINK_TO_SERACH + keyName);
         }
     }
 
