@@ -24,4 +24,8 @@
     <string name="text_search_inform">Input song name !</string>
     <string name="text_connection_information">There is no connection</string>
     <string name="text_last_song_if">Last song in list !</string>
+    <string name="searching_song_name">Searching song name ...</string>
+    <string name="new_hot"><![CDATA[New & Hot]]></string>
+    <string name="top_50_songs">Top 50 songs</string>
+    <string name="other_genres">Other genres</string>
 </resources>

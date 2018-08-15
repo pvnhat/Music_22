@@ -22,13 +22,20 @@ import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.source.local.sqlite.DatabaseSQLite;
 import com.framgia.music_22.screen.main.MainActivity;
+import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.vnnht.music_22.R;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.IllegalFormatCodePointException;
 import java.util.List;
+import java.util.Random;
 
 public class PlayMusicService extends Service {
+
+    public static final int CHECK_NO_LOOP = 1;
+    public static final int CHECK_LOOP_ALL = 2;
+    public static final int CHECK_SHUFFLE = 3;
 
     private static final String EXTRA_PLAY_SONG_ONLINE_LIST = "EXTRA_PLAY_SONG_ONLINE_LIST";
     private static final String EXTRA_PLAY_SONG_OFFLINE_LIST = "EXTRA_PLAY_SONG_OFFLINE_LIST";
@@ -40,6 +47,8 @@ public class PlayMusicService extends Service {
     private static final int ID_FOREGROUND_SERVICE = 1;
 
     private MusicServiceContract mView;
+    private ConnectionChecking mConnectionChecking;
+    private int mCheckShuffleLoop = 1;
     private IBinder mIBinder = new LocalBinder();
     private int mPosition = 0;
     private MediaPlayer mMediaPlayer;
@@ -75,6 +84,7 @@ public class PlayMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        mConnectionChecking = new ConnectionChecking(this.getApplicationContext());
     }
 
     @Override
@@ -97,42 +107,48 @@ public class PlayMusicService extends Service {
     public void onPlayMusicOnlineService(List<Song> songList, int position) {
         mPosition = position;
         mMediaPlayer = new MediaPlayer();
-        mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        try {
-            mMediaPlayer.setDataSource(songList.get(position).getStreamUrl() + Constant.CLIENT_ID);
-            mMediaPlayer.prepareAsync();
-            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(final MediaPlayer mediaPlayer) {
-                    mediaPlayer.start();
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mView.updateMediaToClient(mMediaPlayer);
-                            handler.postDelayed(this, DELAY_TIME);
-                            mediaPlayer.setOnCompletionListener(
-                                    new MediaPlayer.OnCompletionListener() {
-                                        @Override
-                                        public void onCompletion(MediaPlayer mediaPlayer) {
-                                            nextSong();
-                                        }
-                                    });
-                        }
-                    }, DELAY_TIME);
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (mConnectionChecking.isNetworkConnection()) {
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            try {
+                mMediaPlayer.setDataSource(
+                        songList.get(mPosition).getStreamUrl() + Constant.CLIENT_ID);
+                mMediaPlayer.prepareAsync();
+                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(final MediaPlayer mediaPlayer) {
+                        mediaPlayer.start();
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                mView.updateMediaToClient(mMediaPlayer);
+                                handler.postDelayed(this, DELAY_TIME);
+                                mediaPlayer.setOnCompletionListener(
+                                        new MediaPlayer.OnCompletionListener() {
+                                            @Override
+                                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                                nextSong(false);
+                                            }
+                                        });
+                            }
+                        }, DELAY_TIME);
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
+        } else {
+            Toast.makeText(this, getResources().getString(R.string.text_connection_information),
+                    Toast.LENGTH_SHORT).show();
         }
-        startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
     }
 
     public void onPlayMusicOfflineService(List<OfflineSong> songList, int position) {
         mPosition = position;
         mMediaPlayer = new MediaPlayer();
         try {
-            mMediaPlayer.setDataSource(songList.get(position).getSongPath());
+            mMediaPlayer.setDataSource(songList.get(mPosition).getSongPath());
             mMediaPlayer.prepareAsync();
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -148,7 +164,7 @@ public class PlayMusicService extends Service {
                                     new MediaPlayer.OnCompletionListener() {
                                         @Override
                                         public void onCompletion(MediaPlayer mediaPlayer) {
-                                            nextSong();
+                                            nextSong(false);
                                         }
                                     });
                         }
@@ -165,7 +181,7 @@ public class PlayMusicService extends Service {
         Notification notification;
         Intent notitificationInten = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notitificationInten, 0);
-        if (mIsOffline == false) {
+        if (!mIsOffline) {
             notification = new NotificationCompat.Builder(this).setContentTitle(
                     getString(R.string.text_notification_playing))
                     .setAutoCancel(true)
@@ -214,30 +230,22 @@ public class PlayMusicService extends Service {
         }
     }
 
-    public void nextSong() {
+    public void nextSong(boolean isClickPause) {
         mMediaPlayer.release();
-        if (mIsOffline == false) {
-            if (mPosition == mOnlineSongList.size()) {
-                mPosition = 0;
-            } else {
-                mPosition++;
-            }
-            onPlayMusicOnlineService(mOnlineSongList, mPosition);
+        if (!mIsOffline) {
+            onPlayMusicOnlineService(mOnlineSongList,
+                    onLoopShuffleSong(mOnlineSongList.size(), mCheckShuffleLoop, isClickPause));
             mView.onUpdateOnlineSongDetail(mOnlineSongList.get(mPosition));
         } else {
-            if (mPosition == mOfflineSongList.size()) {
-                mPosition = 0;
-            } else {
-                mPosition++;
-            }
-            onPlayMusicOfflineService(mOfflineSongList, mPosition);
+            onPlayMusicOfflineService(mOfflineSongList,
+                    onLoopShuffleSong(mOfflineSongList.size(), mCheckShuffleLoop, isClickPause));
             mView.onUpdateOfflineSongDetail(mOfflineSongList.get(mPosition));
         }
     }
 
     public void previousSong() {
         mMediaPlayer.release();
-        if (mIsOffline == false) {
+        if (!mIsOffline) {
             if (mPosition == 0) {
                 mPosition = mOnlineSongList.size() - 1;
             } else {
@@ -256,6 +264,35 @@ public class PlayMusicService extends Service {
         }
     }
 
+    public void setSuffleLoop(int check) {
+        mCheckShuffleLoop = check;
+    }
+
+    /**
+     * check = 1: no loop, index will run to last element
+     * check = 2 : loop all ,index will run to last element and comback first element
+     * check = 3 : shuffle
+     * else : loop 1
+     */
+    public int onLoopShuffleSong(int listSize, int check, boolean isClickNext) {
+        if ((check == CHECK_NO_LOOP || isClickNext) && mPosition < listSize - 1) {
+            mPosition++;
+        } else if (check == CHECK_LOOP_ALL) {
+            if (mPosition == listSize - 1) {
+                mPosition = 0;
+            } else {
+                mPosition++;
+            }
+        } else if (check == CHECK_SHUFFLE) {
+            Random random = new Random();
+            mPosition = random.nextInt(listSize - 1);
+        } else if (mPosition == listSize - 1) {
+            Toast.makeText(this, getResources().getString(R.string.text_last_song_if),
+                    Toast.LENGTH_SHORT).show();
+        }
+        return mPosition;
+    }
+
     public void downloadSong() {
         if (checkDowloaded()) {
             Toast.makeText(this, R.string.text_inforn_downloaded_song, Toast.LENGTH_SHORT).show();
@@ -272,6 +309,7 @@ public class PlayMusicService extends Service {
             request.setNotificationVisibility(
                     DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationUri(Uri.parse(stringDir));
+            assert downloadManager != null;
             downloadManager.enqueue(request);
             onSaveSongDetail(stringDir);
         }

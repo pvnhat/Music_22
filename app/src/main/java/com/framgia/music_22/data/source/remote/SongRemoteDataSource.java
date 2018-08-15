@@ -73,6 +73,6 @@ public class SongRemoteDataSource implements SongDataSource.RemoteDataSource {
             public void onFetchDataError(Exception errorEx) {
                 callbackData.onGetDataError(errorEx);
             }
-        }).execute(Constant.GENRES_URL + genre + Constant.LIMIT_NUMBER);
+        }).execute(genre + Constant.LIMIT_NUMBER);
     }
 }

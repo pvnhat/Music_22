@@ -1,7 +1,5 @@
 package com.framgia.music_22.utils;
 
-import android.support.annotation.IntDef;
-import android.support.annotation.StringDef;
 import com.framgia.vnnht.music_22.BuildConfig;
 
 public class Constant {
@@ -29,7 +27,9 @@ public class Constant {
     public static final String BASE_URL = "http://api.soundcloud.com";
     public static final String CLIENT_ID = "?client_id=" + BuildConfig.API_KEY;
     public static final String GENRES_URL =
-            BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&";
+            BASE_URL + "/tracks" + CLIENT_ID + "&linked_partitioning=1&genres=";
+    public static final String CLIENT_ID_V2 = "&client_id=" + BuildConfig.API_KEY; // for next pull request
+    public static final String GENRES_URL_V2 = "https://api-v2.soundcloud.com/charts?kind="; // for next pull request
     public static final String LIMIT_NUMBER = "&limit=51";
     public static final String ARRAY_JSON_NAME = "collection";
     public static final String NEXT_HREF = "next_href";

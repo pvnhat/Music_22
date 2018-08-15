@@ -18,14 +18,17 @@ import java.util.List;
 public class SongByGenreActivity extends AppCompatActivity
         implements OnItemClickListener, SongByGenreContract.View {
 
+    private static final String EXTRA_LINK_SONG = "EXTRA_LINK_SONG";
     private static final String EXTRA_MORE_SONG = "EXTRA_MORE_SONG";
 
     private SongByGenreAdapter mAdapter;
+    private String mGenreLink;
     private String mGenre;
     private List<Song> mSongList;
 
-    public static Intent getInstance(Context context, String genre) {
+    public static Intent getInstance(Context context, String genreLink, String genre) {
         Intent intent = new Intent(context, SongByGenreActivity.class);
+        intent.putExtra(EXTRA_LINK_SONG, genreLink);
         intent.putExtra(EXTRA_MORE_SONG, genre);
         return intent;
     }
@@ -47,13 +50,14 @@ public class SongByGenreActivity extends AppCompatActivity
     }
 
     private void initData() {
+        mGenreLink = getIntent().getStringExtra(EXTRA_LINK_SONG);
         mGenre = getIntent().getStringExtra(EXTRA_MORE_SONG);
         onSetActionBar(mGenre);
         SongRepository songRepository =
                 SongRepository.getsInstance(SongRemoteDataSource.getInstance(),
                         SongLocalDataSource.getInstance(getApplicationContext()));
         SongByGenreContract.Presenter presenter = new SongByGenrePresenter(this, songRepository);
-        presenter.getSongByGenres(mGenre);
+        presenter.getSongByGenres(mGenreLink);
     }
 
     @Override
