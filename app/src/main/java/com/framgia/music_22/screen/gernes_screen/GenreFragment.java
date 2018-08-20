@@ -1,17 +1,14 @@
 package com.framgia.music_22.screen.gernes_screen;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.Toast;
-import com.framgia.music_22.screen.home_screen.SlidePagerAdapter;
-import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreActivity;
+import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreFragment;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;
@@ -98,8 +95,11 @@ public class GenreFragment extends Fragment implements View.OnClickListener {
     }
 
     public void onClickToStartActivity(String linkTo) {
-        startActivity(new Intent(
-                SongByGenreActivity.getInstance(getContext(), Constant.GENRES_URL + linkTo,
-                        linkTo)));
+        getActivity().getSupportFragmentManager()
+                .beginTransaction().setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+                .replace(R.id.fragment_genre,
+                        SongByGenreFragment.newInstance(Constant.GENRES_URL + linkTo, linkTo))
+                .addToBackStack(null)
+                .commit();
     }
 }

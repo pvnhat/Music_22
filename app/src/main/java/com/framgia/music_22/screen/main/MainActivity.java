@@ -6,6 +6,7 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.widget.Toast;
 import com.framgia.music_22.data.source.local.sqlite.DatabaseSQLite;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.TypeTab;
@@ -36,13 +37,21 @@ public class MainActivity extends AppCompatActivity
 
     private void initDatabase() {
         DatabaseSQLite databaseSQLite = new DatabaseSQLite(this);
-        databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS " + DatabaseSQLite.TABLE_NAME + " ("
-                + SONG_ID + " TEXT PRIMARY KEY,"
-                + TITLE + " TEXT,"
-                + GENRE + " TEXT,"
-                + SONG_PATH + " TEXT,"
-                + ARTIST_NAME + " TEXT,"
-                + DUARATION + " INTEGER)");
+        databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS "
+                + DatabaseSQLite.TABLE_NAME
+                + " ("
+                + SONG_ID
+                + " TEXT PRIMARY KEY,"
+                + TITLE
+                + " TEXT,"
+                + GENRE
+                + " TEXT,"
+                + SONG_PATH
+                + " TEXT,"
+                + ARTIST_NAME
+                + " TEXT,"
+                + DUARATION
+                + " INTEGER)");
     }
 
     @Override
@@ -84,6 +93,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             mBottomNavigationViewavigation.getMenu().getItem(0).setChecked(true);
         }
+        mPagerMain.getAdapter().notifyDataSetChanged(); // update fragment when it appear
         mBottomNavigationViewavigation.getMenu().getItem(position).setChecked(true);
         mPrevMenuItem = mBottomNavigationViewavigation.getMenu().getItem(position);
     }
@@ -97,7 +107,7 @@ public class MainActivity extends AppCompatActivity
         MainPagerAdapter mainPagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mainPagerAdapter);
         ConnectionChecking connectionChecking = new ConnectionChecking(getApplicationContext());
-        if (!connectionChecking.isNetworkConnection()){
+        if (!connectionChecking.isNetworkConnection()) {
             viewPager.setCurrentItem(TypeTab.TAB_OFFLINE);
         }
     }

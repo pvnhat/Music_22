@@ -1,12 +1,14 @@
 package com.framgia.music_22.screen.play_music_screen;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -16,7 +18,10 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
+import android.util.Log;
+import android.widget.RemoteViews;
 import android.widget.Toast;
 import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
@@ -27,7 +32,6 @@ import com.framgia.music_22.utils.Constant;
 import com.framgia.vnnht.music_22.R;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.IllegalFormatCodePointException;
 import java.util.List;
 import java.util.Random;
 
@@ -47,6 +51,8 @@ public class PlayMusicService extends Service {
     private static final int ID_FOREGROUND_SERVICE = 1;
 
     private MusicServiceContract mView;
+    private ReponseReceive mReponseReceive = new ReponseReceive();
+    private MusicNotification mMusicNotification = new MusicNotification(this);
     private ConnectionChecking mConnectionChecking;
     private int mCheckShuffleLoop = 1;
     private IBinder mIBinder = new LocalBinder();
@@ -54,7 +60,7 @@ public class PlayMusicService extends Service {
     private MediaPlayer mMediaPlayer;
     private List<Song> mOnlineSongList = new ArrayList<>();
     private List<OfflineSong> mOfflineSongList = new ArrayList<>();
-    private boolean mIsOffline;
+    private boolean mIsOffline, isCloseNotification;
     DatabaseSQLite mDatabaseSQLite = new DatabaseSQLite(this);
 
     public static Intent getOnlineInstance(Context context, List<Song> songList, int position) {
@@ -84,7 +90,15 @@ public class PlayMusicService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        initData();
+    }
+
+    private void initData() {
         mConnectionChecking = new ConnectionChecking(this.getApplicationContext());
+        registerReceiver(mReponseReceive, new IntentFilter(MusicNotification.ACTION_PLAY));
+        registerReceiver(mReponseReceive, new IntentFilter(MusicNotification.ACTION_NEXT));
+        registerReceiver(mReponseReceive, new IntentFilter(MusicNotification.ACTION_PREVIOUS));
+        registerReceiver(mReponseReceive, new IntentFilter(MusicNotification.ACTION_CANCEL));
     }
 
     @Override
@@ -122,6 +136,7 @@ public class PlayMusicService extends Service {
                             @Override
                             public void run() {
                                 mView.updateMediaToClient(mMediaPlayer);
+                                if (!isCloseNotification) updateNotification();
                                 handler.postDelayed(this, DELAY_TIME);
                                 mediaPlayer.setOnCompletionListener(
                                         new MediaPlayer.OnCompletionListener() {
@@ -137,7 +152,11 @@ public class PlayMusicService extends Service {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
+            stopForeground(true);
+            startForeground(ID_FOREGROUND_SERVICE,
+                    mMusicNotification.initNotification(mOnlineSongList.get(mPosition).getTitle(),
+                            mOnlineSongList.get(mPosition).getArtist().getSingerName(),
+                            isMusicPlaying()));
         } else {
             Toast.makeText(this, getResources().getString(R.string.text_connection_information),
                     Toast.LENGTH_SHORT).show();
@@ -159,6 +178,7 @@ public class PlayMusicService extends Service {
                         @Override
                         public void run() {
                             mView.updateMediaToClient(mMediaPlayer);
+                            if (!isCloseNotification) updateNotification();
                             handler.postDelayed(this, DELAY_TIME);
                             mediaPlayer.setOnCompletionListener(
                                     new MediaPlayer.OnCompletionListener() {
@@ -174,38 +194,56 @@ public class PlayMusicService extends Service {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
+
+        stopForeground(true);
+        startForeground(ID_FOREGROUND_SERVICE,
+                mMusicNotification.initNotification(mOfflineSongList.get(mPosition).getTitle(),
+                        mOfflineSongList.get(mPosition).getArtistName(), isMusicPlaying()));
     }
 
-    public Notification initForegroundService() {
-        Notification notification;
-        Intent notitificationInten = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notitificationInten, 0);
+    private void updateNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (!mIsOffline) {
-            notification = new NotificationCompat.Builder(this).setContentTitle(
-                    getString(R.string.text_notification_playing))
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_notification_playing)
-                    .setContentTitle(mOnlineSongList.get(mPosition).getTitle())
-                    .setContentIntent(pendingIntent)
-                    .setWhen(System.currentTimeMillis())
-                    .build();
+            notificationManager.notify(1,
+                    mMusicNotification.initNotification(mOnlineSongList.get(mPosition).getTitle(),
+                            mOnlineSongList.get(mPosition).getArtist().getSingerName(),
+                            isMusicPlaying()));
         } else {
-            notification = new NotificationCompat.Builder(this).setContentTitle(
-                    getString(R.string.text_notification_playing))
-                    .setAutoCancel(true)
-                    .setSmallIcon(R.drawable.ic_notification_playing)
-                    .setContentTitle(mOfflineSongList.get(mPosition).getTitle())
-                    .setContentIntent(pendingIntent)
-                    .setWhen(System.currentTimeMillis())
-                    .build();
+            notificationManager.notify(1,
+                    mMusicNotification.initNotification(mOfflineSongList.get(mPosition).getTitle(),
+                            mOfflineSongList.get(mPosition).getArtistName(), isMusicPlaying()));
         }
-
-        return notification;
     }
 
-    public void registerClient(Activity activity) {
-        mView = (MusicServiceContract) activity;
+    public class ReponseReceive extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case MusicNotification.ACTION_PLAY:
+                    if (isMusicPlaying()) {
+                        pauseSong();
+                    } else {
+                        continueSong();
+                    }
+                    break;
+                case MusicNotification.ACTION_NEXT:
+                    nextSong(true);
+                    break;
+                case MusicNotification.ACTION_PREVIOUS:
+                    previousSong();
+                    break;
+                case MusicNotification.ACTION_CANCEL:
+                    stopSelf();
+                    stopForeground(true);
+                    isCloseNotification = true;
+                    break;
+            }
+        }
+    }
+
+    public void registerClient(Fragment fragment) {
+        mView = (MusicServiceContract) fragment;
     }
 
     class LocalBinder extends Binder {
@@ -220,13 +258,11 @@ public class PlayMusicService extends Service {
 
     public void pauseSong() {
         mMediaPlayer.pause();
-        stopForeground(true);
     }
 
     public void continueSong() {
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
-            startForeground(ID_FOREGROUND_SERVICE, initForegroundService());
         }
     }
 

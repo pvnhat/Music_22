@@ -1,6 +1,5 @@
 package com.framgia.music_22.screen.search_screen;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,7 +15,7 @@ import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.repository.SongRepository;
 import com.framgia.music_22.data.source.local.SongLocalDataSource;
 import com.framgia.music_22.data.source.remote.SongRemoteDataSource;
-import com.framgia.music_22.screen.play_music_screen.PlayMusicActivity;
+import com.framgia.music_22.screen.play_music_screen.PlayMusicFragment;
 import com.framgia.music_22.screen.song_by_genre_screen.OnItemClickListener;
 import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreAdapter;
 import com.framgia.music_22.utils.ConnectionChecking;
@@ -98,7 +97,11 @@ public class SearchFragment extends Fragment
 
     @Override
     public void onItemClick(int position) {
-        startActivity(
-                new Intent(PlayMusicActivity.getOnlineInstance(getContext(), mSongList, position)));
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_layout_main,
+                        PlayMusicFragment.newOnlineInstance(mSongList, position))
+                .addToBackStack(null)
+                .commit();
     }
 }

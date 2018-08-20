@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragment_song_by_genre"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_black_80"
+    android:clickable="true"
+    android:focusable="true"
+    >
+    <ImageButton
+        android:id="@+id/button_back"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?android:selectableItemBackground"
+        android:src="@drawable/ic_arrow_back_black_24dp"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent=".17"
+        />
+    <TextView
+        android:id="@+id/text_genre_name"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:gravity="center"
+        android:text="@string/text_for_testing"
+        android:textColor="@color/color_white_100"
+        android:textSize="@dimen/sp_18"
+        app:layout_constraintHeight_percent=".1"
+        app:layout_constraintLeft_toRightOf="@+id/button_back"
+        app:layout_constraintTop_toTopOf="parent"
+
+        />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_songs_by_genre"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layoutManager="android.support.v7.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHeight_percent=".9"
+        />
+</android.support.constraint.ConstraintLayout>

@@ -1,24 +1,32 @@
 package com.framgia.music_22.screen.play_music_screen;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
@@ -28,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayMusicActivity extends AppCompatActivity
+public class PlayMusicFragment extends Fragment
         implements View.OnClickListener, PlayMusicContract.View, MusicServiceContract,
         SeekBar.OnSeekBarChangeListener {
 
@@ -42,64 +50,84 @@ public class PlayMusicActivity extends AppCompatActivity
     private static final int CHECK_LOOP_ONE = 4;
 
     private ImageButton mButtonBack, mButtonPrevious, mButtonPlay, mButtonNext, mButtonLoop,
-            mButtonShuffle, mButtonDownload;
-    private TextView mTextTitle, mTextArtist, mTextCurrentTime, mTextDuarationTime;
+            mButtonShuffle, mButtonDownload, mButtonPreviousBottom, mButtonPlayBottom,
+            mButtonNextBottom;
+    private TextView mTextTitle, mTextArtist, mTextTitleBottom, mTextArtistBottom, mTextCurrentTime,
+            mTextDuarationTime;
     private CircleImageView mImageAvatar;
     private SeekBar mSeekBarProgressSong;
+    private ConstraintLayout mLayoutFull, mLayoutBottom;
     private Animation mAnimation;
     private MediaPlayer mMediaPlayer;
     private int mCheckShuffleLoop = 1;
     private PlayMusicService mPlayMusicService;
     private ServiceConnection mServiceConnection;
 
-    public static Intent getOnlineInstance(Context context, List<Song> songList, int position) {
-        Intent intent = new Intent(context, PlayMusicActivity.class);
-        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST,
+    public static PlayMusicFragment newOnlineInstance(List<Song> songList, int position) {
+        PlayMusicFragment fragment = new PlayMusicFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST,
                 (ArrayList<? extends Parcelable>) songList);
-        intent.putExtra(EXTRA_ONLINE_SONG_POSITION, position);
-        return intent;
+        args.putInt(EXTRA_ONLINE_SONG_POSITION, position);
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    public static Intent getOfflineInstance(Context context, List<OfflineSong> songList,
-            int position, boolean check) {
-        Intent intent = new Intent(context, PlayMusicActivity.class);
-        intent.putParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST,
+    public static PlayMusicFragment newOfflineInstance(List<OfflineSong> songList, int position,
+            boolean check) {
+        PlayMusicFragment fragment = new PlayMusicFragment();
+        Bundle args = new Bundle();
+        args.putParcelableArrayList(EXTRA_PLAY_SONG_OFFLINE_LIST,
                 (ArrayList<? extends Parcelable>) songList);
-        intent.putExtra(EXTRA_OFFLINE_SONG_POSITION, position);
-        intent.putExtra(EXTRA_IS_OFFLINE, check);
-        return intent;
+        args.putInt(EXTRA_OFFLINE_SONG_POSITION, position);
+        args.putBoolean(EXTRA_IS_OFFLINE, check);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_play_music);
-        initView();
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_play_music, container, false);
+        initView(view);
+        initData();
+        return view;
     }
 
-    private void initView() {
-        mTextTitle = findViewById(R.id.text_title);
-        mTextArtist = findViewById(R.id.text_artist);
-        mTextCurrentTime = findViewById(R.id.text_current_time);
-        mTextDuarationTime = findViewById(R.id.text_duaration_time);
-        mImageAvatar = findViewById(R.id.image_avatar);
-        mSeekBarProgressSong = findViewById(R.id.seek_bar_playinh_process);
-        mButtonBack = findViewById(R.id.button_back);
-        mButtonPrevious = findViewById(R.id.button_previous);
-        mButtonPlay = findViewById(R.id.button_play);
-        mButtonNext = findViewById(R.id.button_next);
-        mButtonLoop = findViewById(R.id.button_loop);
-        mButtonShuffle = findViewById(R.id.button_shuffle);
-        mButtonDownload = findViewById(R.id.button_download);
-        mAnimation = AnimationUtils.loadAnimation(this, R.anim.rotated_avatar_dics);
+    private void initView(View view) {
+        mLayoutBottom = view.findViewById(R.id.constrain_buttom);
+        mLayoutFull = view.findViewById(R.id.constrain_full_screen);
+        mTextTitle = view.findViewById(R.id.text_title);
+        mTextArtist = view.findViewById(R.id.text_artist);
+        mTextTitleBottom = view.findViewById(R.id.text_title_bottom);
+        mTextArtistBottom = view.findViewById(R.id.text_artist_bottom);
+        mTextCurrentTime = view.findViewById(R.id.text_current_time);
+        mTextDuarationTime = view.findViewById(R.id.text_duaration_time);
+        mImageAvatar = view.findViewById(R.id.image_avatar);
+        mSeekBarProgressSong = view.findViewById(R.id.seek_bar_playinh_process);
+        mButtonBack = view.findViewById(R.id.button_back);
+        mButtonPrevious = view.findViewById(R.id.button_previous);
+        mButtonPlay = view.findViewById(R.id.button_play);
+        mButtonNext = view.findViewById(R.id.button_next);
+        mButtonPreviousBottom = view.findViewById(R.id.button_previous_bottom);
+        mButtonPlayBottom = view.findViewById(R.id.button_play_bottom);
+        mButtonNextBottom = view.findViewById(R.id.button_next_bottom);
+        mButtonLoop = view.findViewById(R.id.button_loop);
+        mButtonShuffle = view.findViewById(R.id.button_shuffle);
+        mButtonDownload = view.findViewById(R.id.button_download);
+        mAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.rotated_avatar_dics);
 
         mButtonBack.setOnClickListener(this);
         mButtonPrevious.setOnClickListener(this);
         mButtonNext.setOnClickListener(this);
         mButtonPlay.setOnClickListener(this);
+        mButtonPreviousBottom.setOnClickListener(this);
+        mButtonNextBottom.setOnClickListener(this);
+        mButtonPlayBottom.setOnClickListener(this);
         mButtonLoop.setOnClickListener(this);
         mButtonShuffle.setOnClickListener(this);
         mButtonDownload.setOnClickListener(this);
+        mLayoutBottom.setOnClickListener(this);
         mSeekBarProgressSong.setOnSeekBarChangeListener(this);
         onConnectToService();
         initData();
@@ -111,7 +139,7 @@ public class PlayMusicActivity extends AppCompatActivity
             public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
                 PlayMusicService.LocalBinder binder = (PlayMusicService.LocalBinder) iBinder;
                 mPlayMusicService = binder.getServiceInstance();
-                mPlayMusicService.registerClient(PlayMusicActivity.this);
+                mPlayMusicService.registerClient(PlayMusicFragment.this);
             }
 
             @Override
@@ -125,7 +153,33 @@ public class PlayMusicActivity extends AppCompatActivity
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.button_back:
-                finish();
+                mLayoutFull.setVisibility(View.GONE);
+                mLayoutBottom.setVisibility(View.VISIBLE);
+                break;
+            case R.id.constrain_buttom:
+                mLayoutFull.setVisibility(View.VISIBLE);
+                mLayoutBottom.setVisibility(View.GONE);
+                break;
+            case R.id.button_previous_bottom:
+                mPlayMusicService.previousSong();
+                mTextCurrentTime.setText(R.string.text_time);
+                mTextDuarationTime.setText(R.string.text_time);
+                break;
+            case R.id.button_play_bottom:
+                if (mPlayMusicService.isMusicPlaying()) {
+                    mPlayMusicService.pauseSong();
+                    mButtonPlayBottom.setImageResource(R.drawable.ic_play_button);
+                    mImageAvatar.setAnimation(null);
+                } else {
+                    mPlayMusicService.continueSong();
+                    mButtonPlayBottom.setImageResource(R.drawable.ic_pause_button);
+                    mImageAvatar.setAnimation(mAnimation);
+                }
+                break;
+            case R.id.button_next_bottom:
+                mPlayMusicService.nextSong(true);
+                mTextCurrentTime.setText(R.string.text_time);
+                mTextDuarationTime.setText(R.string.text_time);
                 break;
             case R.id.button_previous:
                 mPlayMusicService.previousSong();
@@ -187,16 +241,16 @@ public class PlayMusicActivity extends AppCompatActivity
     }
 
     private void initData() {
-        boolean isOffline = getIntent().getBooleanExtra(EXTRA_IS_OFFLINE, false);
-        if (getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
-            int position = getIntent().getIntExtra(EXTRA_ONLINE_SONG_POSITION, -1);
-            List<Song> songOnlineList =
-                    getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_ONLINE_LIST);
+        Bundle bundle = getArguments();
+        boolean isOffline = bundle.getBoolean(EXTRA_IS_OFFLINE, false);
+        if (bundle.getParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST) != null) {
+            int position = bundle.getInt(EXTRA_ONLINE_SONG_POSITION, -1);
+            List<Song> songOnlineList = bundle.getParcelableArrayList(EXTRA_PLAY_SONG_ONLINE_LIST);
             onPlayMusicOnlineControl(songOnlineList, position);
         } else {
-            int position = getIntent().getIntExtra(EXTRA_OFFLINE_SONG_POSITION, -1);
+            int position = bundle.getInt(EXTRA_OFFLINE_SONG_POSITION, -1);
             List<OfflineSong> songOfflineList =
-                    getIntent().getParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST);
+                    bundle.getParcelableArrayList(EXTRA_PLAY_SONG_OFFLINE_LIST);
             onPlayMusicOfflineControl(songOfflineList, position, isOffline);
         }
     }
@@ -204,7 +258,10 @@ public class PlayMusicActivity extends AppCompatActivity
     private void onPlayMusicOnlineControl(List<Song> songs, int position) {
         mTextTitle.setText(songs.get(position).getTitle());
         mTextArtist.setText(songs.get(position).getArtist().getSingerName());
+        mTextTitleBottom.setText(songs.get(position).getTitle());
+        mTextArtistBottom.setText(songs.get(position).getArtist().getSingerName());
         mButtonPlay.setImageResource(R.drawable.ic_pause_button);
+        mButtonPlayBottom.setImageResource(R.drawable.ic_pause_button);
         mImageAvatar.setAnimation(mAnimation);
         Glide.with(this).load(songs.get(position).getArtist().getAvatarUrl()).into(mImageAvatar);
         onPlayMusicOnline(songs, position);
@@ -214,7 +271,10 @@ public class PlayMusicActivity extends AppCompatActivity
             boolean isOffline) {
         mTextTitle.setText(songs.get(position).getTitle());
         mTextArtist.setText(songs.get(position).getArtistName());
+        mTextTitleBottom.setText(songs.get(position).getTitle());
+        mTextArtistBottom.setText(songs.get(position).getArtistName());
         mButtonPlay.setImageResource(R.drawable.ic_pause_button);
+        mButtonPlayBottom.setImageResource(R.drawable.ic_pause_button);
         mImageAvatar.setAnimation(mAnimation);
         mButtonDownload.setVisibility(View.INVISIBLE);
         Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
@@ -222,15 +282,16 @@ public class PlayMusicActivity extends AppCompatActivity
     }
 
     public void onPlayMusicOnline(List<Song> songList, int position) {
-        Intent intent = PlayMusicService.getOnlineInstance(this, songList, position);
-        startService(intent);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent intent = PlayMusicService.getOnlineInstance(getContext(), songList, position);
+        getContext().startService(intent);
+        getContext().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void onPlayMusicOffline(List<OfflineSong> songList, int position, boolean isOffline) {
-        Intent intent = PlayMusicService.getOfflineInstance(this, songList, position, isOffline);
-        startService(intent);
-        bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        Intent intent =
+                PlayMusicService.getOfflineInstance(getContext(), songList, position, isOffline);
+        getContext().startService(intent);
+        getContext().bindService(intent, mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -242,9 +303,13 @@ public class PlayMusicActivity extends AppCompatActivity
             mTextDuarationTime.setText(dateFormat.format(mMediaPlayer.getDuration()));
             mSeekBarProgressSong.setMax(mMediaPlayer.getDuration());
             mButtonPlay.setImageResource(R.drawable.ic_pause_button);
+            mButtonPlayBottom.setImageResource(R.drawable.ic_pause_button);
+            mImageAvatar.setAnimation(mAnimation);
             mSeekBarProgressSong.setProgress(mediaPlayer.getCurrentPosition());
         } else {
             mButtonPlay.setImageResource(R.drawable.ic_play_button);
+            mButtonPlayBottom.setImageResource(R.drawable.ic_play_button);
+            mImageAvatar.setAnimation(null);
         }
     }
 
@@ -252,6 +317,8 @@ public class PlayMusicActivity extends AppCompatActivity
     public void onUpdateOnlineSongDetail(Song song) {
         mTextTitle.setText(song.getTitle());
         mTextArtist.setText(song.getArtist().getSingerName());
+        mTextTitleBottom.setText(song.getTitle());
+        mTextArtistBottom.setText(song.getArtist().getSingerName());
         Glide.with(this).load(song.getArtist().getAvatarUrl()).into(mImageAvatar);
     }
 
@@ -259,6 +326,8 @@ public class PlayMusicActivity extends AppCompatActivity
     public void onUpdateOfflineSongDetail(OfflineSong song) {
         mTextTitle.setText(song.getTitle());
         mTextArtist.setText(song.getArtistName());
+        mTextTitleBottom.setText(song.getTitle());
+        mTextArtistBottom.setText(song.getArtistName());
         Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
     }
 
@@ -280,11 +349,11 @@ public class PlayMusicActivity extends AppCompatActivity
     }
 
     private void onRequestStoragePermisson() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(getContext(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             mPlayMusicService.downloadSong();
         } else {
-            ActivityCompat.requestPermissions(this,
+            ActivityCompat.requestPermissions(getActivity(),
                     new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE },
                     REQUEST_PERMISSION_CODE);
         }

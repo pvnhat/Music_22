@@ -40,6 +40,7 @@ public class MainPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getItemPosition(@NonNull Object object) {
+        // allow fragment fragment reload
         return POSITION_NONE;
     }
 }

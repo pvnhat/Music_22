@@ -1,6 +1,5 @@
 package com.framgia.music_22.screen.home_screen;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,7 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreActivity;
+import com.framgia.music_22.screen.song_by_genre_screen.SongByGenreFragment;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.music_22.utils.TypeGenre;
@@ -105,19 +104,19 @@ public class HomeFragment extends Fragment
         if (mConnectionChecking.isNetworkConnection()) {
             switch (view.getId()) {
                 case R.id.button_all_audios:
-                    onClickToStartActivity(TypeGenre.ALL_AUDIO);
+                    onClickToStartFragment(TypeGenre.ALL_AUDIO);
                     break;
                 case R.id.button_all_song:
-                    onClickToStartActivity(TypeGenre.ALL_MUSIC);
+                    onClickToStartFragment(TypeGenre.ALL_MUSIC);
                     break;
                 case R.id.button_alternativerock:
-                    onClickToStartActivity(TypeGenre.ALTERNATIVEROCK);
+                    onClickToStartFragment(TypeGenre.ALTERNATIVEROCK);
                     break;
                 case R.id.button_ambient:
-                    onClickToStartActivity(TypeGenre.AMBIENT);
+                    onClickToStartFragment(TypeGenre.AMBIENT);
                     break;
                 case R.id.button_classic:
-                    onClickToStartActivity(TypeGenre.CLASSICAL);
+                    onClickToStartFragment(TypeGenre.CLASSICAL);
                     break;
             }
         } else {
@@ -126,9 +125,13 @@ public class HomeFragment extends Fragment
         }
     }
 
-    public void onClickToStartActivity(String linkTo) {
-        startActivity(new Intent(
-                SongByGenreActivity.getInstance(getContext(), Constant.GENRES_URL + linkTo,
-                        linkTo)));
+    public void onClickToStartFragment(String linkTo) {
+        getActivity().getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left)
+                .replace(R.id.fragment_home_page,
+                        SongByGenreFragment.newInstance(Constant.GENRES_URL + linkTo, linkTo))
+                .addToBackStack(null)
+                .commit();
     }
 }
