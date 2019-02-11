@@ -3,46 +3,61 @@ package com.framgia.music_22.screen.main;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+import android.view.View;
 import com.framgia.music_22.data.source.local.sqlite.DatabaseSQLite;
+import com.framgia.music_22.screen.base.Navigator;
+import com.framgia.music_22.screen.music_player.PlayMusicFragment;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.TypeTab;
 import com.framgia.vnnht.music_22.R;
 
 public class MainActivity extends AppCompatActivity
-        implements BottomNavigationView.OnNavigationItemSelectedListener,
-        ViewPager.OnPageChangeListener {
+    implements BottomNavigationView.OnNavigationItemSelectedListener,
+    ViewPager.OnPageChangeListener {
 
     private static final String SONG_ID = "SongId";
     private static final String TITLE = "Title";
     private static final String GENRE = "Genre";
     private static final String SONG_PATH = "SongPath";
     private static final String ARTIST_NAME = "ArtistName";
-    private static final String DUARATION = "Duaration";
+    private static final String DURATION = "Duration";
+    private static final String TIME_FORMAT = "mm:ss";
 
     private ViewPager mPagerMain;
     private BottomNavigationView mBottomNavigationViewavigation;
     private MenuItem mPrevMenuItem;
+    private View mInclude, mViewClick;
+    private Navigator mNavigator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initFragment();
+        initView();
         initDatabase();
     }
 
     private void initDatabase() {
         DatabaseSQLite databaseSQLite = new DatabaseSQLite(this);
-        databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS " + DatabaseSQLite.TABLE_NAME + " ("
-                + SONG_ID + " TEXT PRIMARY KEY,"
-                + TITLE + " TEXT,"
-                + GENRE + " TEXT,"
-                + SONG_PATH + " TEXT,"
-                + ARTIST_NAME + " TEXT,"
-                + DUARATION + " INTEGER)");
+        databaseSQLite.queryData("CREATE TABLE IF NOT EXISTS "
+            + DatabaseSQLite.TABLE_NAME
+            + " ("
+            + SONG_ID
+            + " TEXT PRIMARY KEY,"
+            + TITLE
+            + " TEXT,"
+            + GENRE
+            + " TEXT,"
+            + SONG_PATH
+            + " TEXT,"
+            + ARTIST_NAME
+            + " TEXT,"
+            + DURATION
+            + " INTEGER)");
     }
 
     @Override
@@ -64,12 +79,26 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
-    private void initFragment() {
-        mBottomNavigationViewavigation = (BottomNavigationView) findViewById(R.id.navigation);
+    private void initView() {
+        mBottomNavigationViewavigation = findViewById(R.id.navigation);
+        mInclude = findViewById(R.id.include_mini_player);
+        mViewClick = findViewById(R.id.view_mini_player);
         mBottomNavigationViewavigation.setOnNavigationItemSelectedListener(this);
         mPagerMain = findViewById(R.id.pager_main);
         mPagerMain.addOnPageChangeListener(this);
         setUpViewPager(mPagerMain);
+        mInclude.setVisibility(View.GONE);
+
+        mNavigator = new Navigator();
+
+        mViewClick.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Fragment fragment =
+                    mNavigator.findFragment(MainActivity.this, PlayMusicFragment.TAG);
+                mNavigator.showFragment(getSupportFragmentManager(), fragment, false, true);
+            }
+        });
     }
 
     @Override
@@ -93,12 +122,33 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    public void addFragment(Fragment fragment, Boolean haveAnimation, String tag,
+        Boolean addToBackStack) {
+        Navigator navigator = new Navigator();
+        navigator.addFragment(getSupportFragmentManager(), fragment, R.id.fl_container_full,
+            addToBackStack, tag, null, haveAnimation);
+    }
+
     private void setUpViewPager(ViewPager viewPager) {
         MainPagerAdapter mainPagerAdapter = new MainPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mainPagerAdapter);
         ConnectionChecking connectionChecking = new ConnectionChecking(getApplicationContext());
-        if (!connectionChecking.isNetworkConnection()){
+        if (!connectionChecking.isNetworkConnection()) {
             viewPager.setCurrentItem(TypeTab.TAB_OFFLINE);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.overridePendingTransition(R.anim.slide_bottom_up, R.anim.slide_top_down);
+    }
+
+    public void hideBottomButton() {
+        mBottomNavigationViewavigation.setVisibility(View.GONE);
+    }
+
+    public void showBottomButton() {
+        mBottomNavigationViewavigation.setVisibility(View.VISIBLE);
     }
 }
