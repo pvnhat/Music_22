@@ -6,4 +6,26 @@
     <string name="title_offline">Offline</string>
     <string name="title_singer">Singer</string>
     <string name="title_gernes">Gernes</string>
+    <string name="text_frag4">Frag4</string>
+    <string name="text_frag1">Frag1</string>
+    <string name="text_frag2">Frag2</string>
+    <string name="text_frag3">Frag3</string>
+    <string name="string_onclick_item">Put here for next pull request</string>
+    <string name="text_favorite_genres">Favourite Genres:</string>
+    <string name="error_get_data">Ops ! Error while requesting !</string>
+    <string name="text_for_testing">Cuoc Song Em On Khong</string>
+    <string name="text_time">00:00</string>
+    <string name="text_inform_to_client_permisson">You have already permiss this permission !</string>
+    <string name="text_dowloading">Downloading ...</string>
+    <string name="text_download">Download:</string>
+    <string name="text_notification_playing">Playing Music</string>
+    <string name="text_inforn_downloaded_song">You have already downloaded this song !</string>
+    <string name="title_search">Search</string>
+    <string name="text_search_inform">Input song name !</string>
+    <string name="text_connection_information">There is no connection</string>
+    <string name="text_last_song_if">Last song in list !</string>
+    <string name="searching_song_name">Searching song name ...</string>
+    <string name="new_hot"><![CDATA[New & Hot]]></string>
+    <string name="top_50_songs">Top 50 songs</string>
+    <string name="other_genres">Other genres</string>
 </resources>
