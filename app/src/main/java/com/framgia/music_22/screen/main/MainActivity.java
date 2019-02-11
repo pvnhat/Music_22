@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity
     private static final String GENRE = "Genre";
     private static final String SONG_PATH = "SongPath";
     private static final String ARTIST_NAME = "ArtistName";
-    private static final String DUARATION = "Duaration";
+    private static final String DURATION = "Duration";
 
     private ViewPager mPagerMain;
     private BottomNavigationView mBottomNavigationViewavigation;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
                 + GENRE + " TEXT,"
                 + SONG_PATH + " TEXT,"
                 + ARTIST_NAME + " TEXT,"
-                + DUARATION + " INTEGER)");
+                + DURATION + " INTEGER)");
     }
 
     @Override
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initFragment() {
-        mBottomNavigationViewavigation = (BottomNavigationView) findViewById(R.id.navigation);
+        mBottomNavigationViewavigation = findViewById(R.id.navigation);
         mBottomNavigationViewavigation.setOnNavigationItemSelectedListener(this);
         mPagerMain = findViewById(R.id.pager_main);
         mPagerMain.addOnPageChangeListener(this);

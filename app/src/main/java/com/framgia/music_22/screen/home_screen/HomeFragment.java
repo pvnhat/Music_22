@@ -2,6 +2,7 @@ package com.framgia.music_22.screen.home_screen;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -23,8 +24,29 @@ import com.framgia.vnnht.music_22.R;
 public class HomeFragment extends Fragment
         implements HomePageContract.View, ViewPager.OnPageChangeListener, View.OnClickListener {
 
+    private static int VIRTUAL_SLIDE_NUMBER = 100;
+    private static int DELAY_TIME = 2000;
+
+    private ViewPager viewPagerBanner;
+    private Handler mHandler;
     private LinearLayout mLinearDots;
+    private int mSlideCurrentPage = 0;
     private ConnectionChecking mConnectionChecking;
+    SlidePagerAdapter slidePagerAdapter;
+    private Runnable mRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (slidePagerAdapter == null) return;
+            if (mSlideCurrentPage ==  slidePagerAdapter.getCount() * VIRTUAL_SLIDE_NUMBER){
+                mSlideCurrentPage = 0;
+            } else{
+                mSlideCurrentPage = mSlideCurrentPage % slidePagerAdapter.getCount();
+                mSlideCurrentPage++;
+            }
+            viewPagerBanner.setCurrentItem(mSlideCurrentPage, true);
+            mHandler.postDelayed(this, DELAY_TIME);
+        }
+    };
 
     public static HomeFragment newInstance() {
         return new HomeFragment();
@@ -36,11 +58,12 @@ public class HomeFragment extends Fragment
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
         initView(view);
+
         return view;
     }
 
     private void initView(View view) {
-        ViewPager viewPagerBanner = view.findViewById(R.id.viewpager_banner);
+        viewPagerBanner = view.findViewById(R.id.viewpager_banner);
         mLinearDots = view.findViewById(R.id.linear_dots);
         ImageButton buttonAllAudio = view.findViewById(R.id.button_all_audios);
         ImageButton buttonAllSong = view.findViewById(R.id.button_all_song);
@@ -56,7 +79,23 @@ public class HomeFragment extends Fragment
         buttonAmbient.setOnClickListener(this);
         buttonClassic.setOnClickListener(this);
 
-        SlidePagerAdapter slidePagerAdapter = new SlidePagerAdapter(getActivity());
+        mHandler = new Handler();
+        slidePagerAdapter = new SlidePagerAdapter(getActivity());
+        viewPagerBanner.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset,
+                    int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mSlideCurrentPage = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+            }
+        });
         viewPagerBanner.setAdapter(slidePagerAdapter);
         onCreateDots(0);
     }
@@ -87,7 +126,6 @@ public class HomeFragment extends Fragment
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
     }
 
     @Override
@@ -97,7 +135,6 @@ public class HomeFragment extends Fragment
 
     @Override
     public void onPageScrollStateChanged(int state) {
-
     }
 
     @Override
@@ -130,5 +167,17 @@ public class HomeFragment extends Fragment
         startActivity(new Intent(
                 SongByGenreActivity.getInstance(getContext(), Constant.GENRES_URL + linkTo,
                         linkTo)));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mHandler.postDelayed(mRunnable, DELAY_TIME);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mHandler.removeCallbacks(mRunnable);
     }
 }
