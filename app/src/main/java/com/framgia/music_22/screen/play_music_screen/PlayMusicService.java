@@ -1,9 +1,7 @@
 package com.framgia.music_22.screen.play_music_screen;
 
 import android.app.DownloadManager;
-import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -19,14 +17,10 @@ import android.os.IBinder;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-import android.widget.RemoteViews;
 import android.widget.Toast;
 import com.framgia.music_22.data.model.OfflineSong;
 import com.framgia.music_22.data.model.Song;
 import com.framgia.music_22.data.source.local.sqlite.DatabaseSQLite;
-import com.framgia.music_22.screen.main.MainActivity;
 import com.framgia.music_22.utils.ConnectionChecking;
 import com.framgia.music_22.utils.Constant;
 import com.framgia.vnnht.music_22.R;
@@ -115,6 +109,7 @@ public class PlayMusicService extends Service {
             mOfflineSongList = intent.getParcelableArrayListExtra(EXTRA_PLAY_SONG_OFFLINE_LIST);
             onPlayMusicOfflineService(mOfflineSongList, position);
         }
+        updateNotification();
         return START_NOT_STICKY;
     }
 
@@ -136,7 +131,6 @@ public class PlayMusicService extends Service {
                             @Override
                             public void run() {
                                 mView.updateMediaToClient(mMediaPlayer);
-                                if (!isCloseNotification) updateNotification();
                                 handler.postDelayed(this, DELAY_TIME);
                                 mediaPlayer.setOnCompletionListener(
                                         new MediaPlayer.OnCompletionListener() {
@@ -178,7 +172,6 @@ public class PlayMusicService extends Service {
                         @Override
                         public void run() {
                             mView.updateMediaToClient(mMediaPlayer);
-                            if (!isCloseNotification) updateNotification();
                             handler.postDelayed(this, DELAY_TIME);
                             mediaPlayer.setOnCompletionListener(
                                     new MediaPlayer.OnCompletionListener() {
@@ -201,7 +194,7 @@ public class PlayMusicService extends Service {
                         mOfflineSongList.get(mPosition).getArtistName(), isMusicPlaying()));
     }
 
-    private void updateNotification() {
+    public void updateNotification() {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (!mIsOffline) {
@@ -226,12 +219,15 @@ public class PlayMusicService extends Service {
                     } else {
                         continueSong();
                     }
+                    updateNotification();
                     break;
                 case MusicNotification.ACTION_NEXT:
                     nextSong(true);
+                    updateNotification();
                     break;
                 case MusicNotification.ACTION_PREVIOUS:
                     previousSong();
+                    updateNotification();
                     break;
                 case MusicNotification.ACTION_CANCEL:
                     stopSelf();
@@ -263,6 +259,12 @@ public class PlayMusicService extends Service {
     public void continueSong() {
         if (!mMediaPlayer.isPlaying()) {
             mMediaPlayer.start();
+            if (isCloseNotification) {
+                startForeground(ID_FOREGROUND_SERVICE, mMusicNotification.initNotification(
+                        mOfflineSongList.get(mPosition).getTitle(),
+                        mOfflineSongList.get(mPosition).getArtistName(), isMusicPlaying()));
+                isCloseNotification = false;
+            }
         }
     }
 

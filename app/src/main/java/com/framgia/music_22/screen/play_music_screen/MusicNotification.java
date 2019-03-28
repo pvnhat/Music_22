@@ -78,6 +78,8 @@ public class MusicNotification extends Notification {
         Intent cancelIntent = new Intent(ACTION_CANCEL);
         playIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pCancel = PendingIntent.getBroadcast(mContext, 0, cancelIntent, 0);
-        view.setOnClickPendingIntent(R.id.button_cancel_notification, pCancel);
+        if (!isPlayingMusic) {
+            view.setOnClickPendingIntent(R.id.button_cancel_notification, pCancel);
+        }
     }
 }

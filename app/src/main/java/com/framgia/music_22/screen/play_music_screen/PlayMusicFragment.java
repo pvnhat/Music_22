@@ -175,6 +175,7 @@ public class PlayMusicFragment extends Fragment
                     mButtonPlayBottom.setImageResource(R.drawable.ic_pause_button);
                     mImageAvatar.setAnimation(mAnimation);
                 }
+                mPlayMusicService.updateNotification();
                 break;
             case R.id.button_next_bottom:
                 mPlayMusicService.nextSong(true);
@@ -196,6 +197,7 @@ public class PlayMusicFragment extends Fragment
                     mButtonPlay.setImageResource(R.drawable.ic_pause_button);
                     mImageAvatar.setAnimation(mAnimation);
                 }
+                mPlayMusicService.updateNotification();
                 break;
             case R.id.button_next:
                 mPlayMusicService.nextSong(true);
@@ -211,7 +213,6 @@ public class PlayMusicFragment extends Fragment
             case R.id.button_download:
                 onRequestStoragePermisson();
                 break;
-            default:
         }
     }
 
@@ -263,7 +264,11 @@ public class PlayMusicFragment extends Fragment
         mButtonPlay.setImageResource(R.drawable.ic_pause_button);
         mButtonPlayBottom.setImageResource(R.drawable.ic_pause_button);
         mImageAvatar.setAnimation(mAnimation);
-        Glide.with(this).load(songs.get(position).getArtist().getAvatarUrl()).into(mImageAvatar);
+        if (getActivity() != null) {
+            Glide.with(this)
+                    .load(songs.get(position).getArtist().getAvatarUrl())
+                    .into(mImageAvatar);
+        }
         onPlayMusicOnline(songs, position);
     }
 
@@ -328,7 +333,6 @@ public class PlayMusicFragment extends Fragment
         mTextArtist.setText(song.getArtistName());
         mTextTitleBottom.setText(song.getTitle());
         mTextArtistBottom.setText(song.getArtistName());
-        Glide.with(this).load(R.drawable.default_avatart_song).into(mImageAvatar);
     }
 
     @Override
